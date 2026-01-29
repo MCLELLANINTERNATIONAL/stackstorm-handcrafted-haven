@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Customers',
+  title: 'catalog',
 };
 
 export default function Page() {
-    return <p>Customers Page</p>;
+    return <p>catalog Page</p>;
 }
