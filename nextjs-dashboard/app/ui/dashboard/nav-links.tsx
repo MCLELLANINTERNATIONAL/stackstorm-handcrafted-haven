@@ -17,7 +17,7 @@ const links = [
  
   { name: 'Catalog', href: '/dashboard/catalog', icon: UserGroupIcon },
   
-  { name: 'Seller Profiles', href: '/dashboard/sellerprofiles', icon: UserCircleIcon },
+  { name: 'Sellers', href: '/dashboard/sellers', icon: UserCircleIcon },
   
   { name: 'Invoices', href: '/dashboard/invoices', icon: DocumentDuplicateIcon,},
 ];

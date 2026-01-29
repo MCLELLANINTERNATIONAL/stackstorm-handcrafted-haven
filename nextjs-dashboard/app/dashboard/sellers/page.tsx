@@ -1,4 +1,4 @@
-export default function SellerProfilesPage() {
+export default function SellersPage() {
     return (
       <div className="max-w-4xl">
         <h1 className="text-2xl font-semibold">Seller Profiles</h1>

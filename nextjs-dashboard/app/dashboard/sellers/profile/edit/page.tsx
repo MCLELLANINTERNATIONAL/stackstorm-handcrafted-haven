@@ -1,4 +1,4 @@
-export default function EditSellerProfilePage() {
+export default function EditProfilePage() {
     return (
       <div className="max-w-4xl">
         <h1 className="text-2xl font-semibold">Edit Seller Profile</h1>
