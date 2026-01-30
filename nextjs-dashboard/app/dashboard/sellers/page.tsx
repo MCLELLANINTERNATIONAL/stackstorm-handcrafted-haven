@@ -1,7 +1,7 @@
 export default function SellersPage() {
     return (
       <div className="max-w-4xl">
-        <h1 className="text-2xl font-semibold">Seller Profiles</h1>
+        <h1 className="text-2xl font-semibold">Sellers</h1>
         <p className="mt-2 text-gray-600">
           Share your craftsmanship, your story, and what makes your work unique.
         </p>
