@@ -16,6 +16,28 @@ export type Customer = {
   image_url: string;
 };
 
+// Seller types
+export type SellerField = {
+  id: string;
+  seller_id: string;
+};
+
+export type SellersTableType = {
+  id: string;
+  seller_id: string;
+  email: string;
+  contact_no: string;
+  created_at: string; // or Date
+};
+
+export type SellerForm = {
+  id: string;
+  seller_id: string;
+  email: string;
+  contact_no: string;
+  created_at: string; // or Date
+};
+
 export type Invoice = {
   id: string;
   customer_id: string;
