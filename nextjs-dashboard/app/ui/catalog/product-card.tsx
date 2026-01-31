@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import DiscountTag from "./discount-tag";
 import { Button } from "../button";
+import PriceTag from "./price-tag";
 
 export default function ProductCard({
   sellerDetails,
@@ -42,7 +43,8 @@ export default function ProductCard({
               className={`${inter.className} text-xs text-gray-600`}
             >{`${sellerDetails.address}`}</h3>
           </div>
-          <div>
+          <div className="flex justify-between items-center">
+            <PriceTag price={87} />
             <Button children={"Buy Now"} />
           </div>
         </div>
