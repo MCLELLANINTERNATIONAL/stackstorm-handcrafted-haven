@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import Breadcrumbs from '@/app/ui/sellers/breadcrumbs';
+import Breadcrumbs from '@/app/ui/invoices/breadcrumbs'; // or create seller breadcrumbs if you want
 import SellerForm from '@/app/ui/sellers/create-form';
 import { fetchSellers } from '@/app/lib/seller-data';
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 // Ensures this page is rendered dynamically (good while developing DB features)
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export default async function Page() {
   const sellers = await fetchSellers();
@@ -23,6 +25,12 @@ export default async function Page() {
           { label: 'Profile', href: '/dashboard/sellers/profile' },
           {
             label: 'Create',
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: 'Sellers', href: '/dashboard/sellers' },
+          {
+            label: 'Create Seller Profile',
             href: '/dashboard/sellers/profile/create',
             active: true,
           },
@@ -41,3 +49,5 @@ export default async function Page() {
   );
 }
 
+
+  

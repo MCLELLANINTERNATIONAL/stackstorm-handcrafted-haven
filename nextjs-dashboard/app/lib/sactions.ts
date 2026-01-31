@@ -109,7 +109,7 @@ export async function updateSeller(
   redirect('/dashboard/sellers');
 }
 
-export async function deleteSeller(id: string,  _formData: FormData) {
+export async function deleteSeller(id: string): Promise<void> {
   try {
     await sql`
       DELETE FROM sellers
