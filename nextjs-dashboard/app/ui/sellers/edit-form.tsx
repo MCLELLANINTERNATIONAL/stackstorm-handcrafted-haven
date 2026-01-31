@@ -11,12 +11,25 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/app/ui/button';
-import type { SellerField } from '@/app/lib/definitions';
-import { createSeller, type State } from '@/app/lib/sactions';
+import type { SellerField, SellerForm } from '@/app/lib/definitions';
+import { updateSeller, type State } from '@/app/lib/sactions';
 
-export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
+export default function EditSellerProfileForm({
+  seller,
+  sellers,
+}: {
+  seller: SellerForm;
+  sellers: SellerField[];
+}) {
+  // message must be a string AND errors must always exist
   const initialState: State = { message: '', errors: {} };
-  const [state, formAction] = useActionState(createSeller, initialState);
+
+  // Avoid bind() overload issues by using an inline wrapper
+  const action = async (prevState: State, formData: FormData) => {
+    return updateSeller(seller.id, prevState, formData);
+  };
+
+  const [state, formAction] = useActionState(action, initialState);
 
   return (
     <form action={formAction}>
@@ -24,22 +37,22 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
         {/* Seller */}
         <div className="mb-4">
           <label htmlFor="seller" className="mb-2 block text-sm font-medium">
-            Choose seller
+            Seller ID
           </label>
           <div className="relative">
             <select
               id="seller"
               name="sellerId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue=""
+              defaultValue={seller.seller_id ?? ''}
               aria-describedby="sellerId-error"
             >
               <option value="" disabled>
                 Select a seller
               </option>
-              {sellers.map((seller) => (
-                <option key={seller.id} value={seller.seller_id}>
-                  {seller.seller_id}
+              {sellers.map((s) => (
+                <option key={s.id} value={s.seller_id}>
+                  {s.seller_id}
                 </option>
               ))}
             </select>
@@ -47,7 +60,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="sellerId-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.sellerId?.map((error: string) => (
+            {state.errors?.sellerId?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -65,6 +78,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
               id="email"
               name="email"
               type="email"
+              defaultValue={seller.email ?? ''}
               placeholder="seller@email.com"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="email-error"
@@ -73,7 +87,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="email-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.email?.map((error: string) => (
+            {state.errors?.email?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -83,29 +97,30 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
 
         {/* Contact */}
         <div className="mb-4">
-          <label htmlFor="contact" className="mb-2 block text-sm font-medium">
-            Contact Number
+          <label htmlFor="contact_no" className="mb-2 block text-sm font-medium">
+            Contact number
           </label>
           <div className="relative">
             <input
-              id="contact"
-              name="contact"
+              id="contact_no"
+              name="contact_no"
               type="text"
+              defaultValue={seller.contact_no ?? ''}
               placeholder="+44 7xxx xxx xxx"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              aria-describedby="contact-error"
+              aria-describedby="contact_no-error"
             />
             <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
           </div>
 
-          <div id="contact-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.contact?.map((error: string) => (
+          <div id="contact_no-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.contact?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
             ))}
           </div>
-        </div>pnp
+        </div>
 
         {/* Date */}
         <div className="mb-4">
@@ -117,6 +132,11 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
               id="date"
               name="date"
               type="date"
+              defaultValue={
+                seller.created_at
+                  ? new Date(seller.created_at).toISOString().slice(0, 10)
+                  : ''
+              }
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="date-error"
             />
@@ -124,7 +144,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="date-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.date?.map((error: string) => (
+            {state.errors?.date?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -132,7 +152,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
         </div>
 
-        {/* Seller Story */}
+        {/* Story */}
         <div className="mb-4">
           <label htmlFor="story" className="mb-2 block text-sm font-medium">
             Seller story
@@ -142,6 +162,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
               id="story"
               name="story"
               rows={5}
+              defaultValue={seller.story ?? ''}
               placeholder="Tell customers about your craftsmanship, inspiration, and what makes your work unique..."
               className="peer block w-full resize-none rounded-md border border-gray-200 py-2 pl-10 pr-3 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="story-error"
@@ -150,7 +171,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="story-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.story?.map((error: string) => (
+            {state.errors?.story?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -158,21 +179,24 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
         </div>
 
-        {/* Optional message */}
-        {state.message ? (
-          <p className="mt-2 text-sm text-red-500">{state.message}</p>
-        ) : null}
+        {/* Message */}
+        <div aria-live="polite" aria-atomic="true">
+          {state.message ? (
+            <p className="mt-2 text-sm text-red-500">{state.message}</p>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-6 flex justify-end gap-4">
         <Link
-          href="/dashboard/sellers"
+          href="/dashboard/sellers/profile"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
           Cancel
         </Link>
-        <Button type="submit">Create Seller Profile</Button>
+        <Button type="submit">Save Changes</Button>
       </div>
     </form>
   );
 }
+

@@ -1,5 +1,5 @@
 import postgres from 'postgres';
-import { SellerField, SellerForm, SellersTableType } from './definitions';
+import { SellerForm, SellersTableType } from './definitions';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -7,10 +7,14 @@ const ITEMS_PER_PAGE = 6;
 
 export async function fetchSellers() {
   try {
-    const sellers = await sql<SellerField[]>`
+    const sellers = await sql<SellersTableType[]>`
       SELECT
         id,
-        seller_id
+        seller_id,
+        email,
+        contact_no,
+        created_at,
+        story
       FROM sellers
       ORDER BY seller_id ASC
     `;
@@ -32,7 +36,8 @@ export async function fetchFilteredSellers(query: string, currentPage: number) {
         seller_id,
         email,
         contact_no,
-        created_at
+        created_at,
+        story
       FROM sellers
       WHERE
         seller_id ILIKE ${`%${query}%`} OR
@@ -60,6 +65,7 @@ export async function fetchSellersPages(query: string) {
         email ILIKE ${`%${query}%`} OR
         contact_no ILIKE ${`%${query}%`} OR
         created_at::text ILIKE ${`%${query}%`}
+        story ILIKE ${`%${query}%`}
     `;
 
     const totalPages = Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
@@ -71,6 +77,9 @@ export async function fetchSellersPages(query: string) {
 }
 
 export async function fetchSellerById(id: string) {
+  if (!id) {
+    throw new Error('fetchSellerById: id is required (received undefined/empty).');
+  }
   try {
     const data = await sql<SellerForm[]>`
       SELECT
@@ -78,7 +87,8 @@ export async function fetchSellerById(id: string) {
         seller_id,
         email,
         contact_no,
-        created_at
+        created_at,
+        story
       FROM sellers
       WHERE id = ${id};
     `;

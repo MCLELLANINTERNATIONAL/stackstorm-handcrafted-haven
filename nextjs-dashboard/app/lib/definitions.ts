@@ -35,7 +35,8 @@ export type SellerForm = {
   seller_id: string;
   email: string;
   contact_no: string;
-  created_at: string; // or Date
+  created_at:  Date | string;
+  story: string;
 };
 
 export type Invoice = {
