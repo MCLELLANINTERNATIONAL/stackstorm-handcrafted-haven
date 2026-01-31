@@ -77,6 +77,9 @@ export async function fetchSellersPages(query: string) {
 }
 
 export async function fetchSellerById(id: string) {
+  if (!id) {
+    throw new Error('fetchSellerById: id is required (received undefined/empty).');
+  }
   try {
     const data = await sql<SellerForm[]>`
       SELECT

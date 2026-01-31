@@ -21,11 +21,15 @@ export default function EditSellerProfileForm({
   seller: SellerForm;
   sellers: SellerField[];
 }) {
-  const initialState: State = { message: null, errors: {} };
+  // message must be a string AND errors must always exist
+  const initialState: State = { message: '', errors: {} };
 
-  // Bind the seller id so the server action signature matches useActionState
-  const updateSellerWithId = updateSeller.bind(null, seller.id);
-  const [state, formAction] = useActionState(updateSellerWithId, initialState);
+  // Avoid bind() overload issues by using an inline wrapper
+  const action = async (prevState: State, formData: FormData) => {
+    return updateSeller(seller.id, prevState, formData);
+  };
+
+  const [state, formAction] = useActionState(action, initialState);
 
   return (
     <form action={formAction}>
@@ -33,14 +37,14 @@ export default function EditSellerProfileForm({
         {/* Seller */}
         <div className="mb-4">
           <label htmlFor="seller" className="mb-2 block text-sm font-medium">
-            Choose seller
+            Seller ID
           </label>
           <div className="relative">
             <select
               id="seller"
               name="sellerId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={seller.seller_id}
+              defaultValue={seller.seller_id ?? ''}
               aria-describedby="sellerId-error"
             >
               <option value="" disabled>
@@ -56,7 +60,7 @@ export default function EditSellerProfileForm({
           </div>
 
           <div id="sellerId-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.sellerId?.map((error: string) => (
+            {state.errors?.sellerId?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -74,7 +78,7 @@ export default function EditSellerProfileForm({
               id="email"
               name="email"
               type="email"
-              defaultValue={seller.email}
+              defaultValue={seller.email ?? ''}
               placeholder="seller@email.com"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="email-error"
@@ -83,7 +87,7 @@ export default function EditSellerProfileForm({
           </div>
 
           <div id="email-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.email?.map((error: string) => (
+            {state.errors?.email?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -93,24 +97,24 @@ export default function EditSellerProfileForm({
 
         {/* Contact */}
         <div className="mb-4">
-          <label htmlFor="contact" className="mb-2 block text-sm font-medium">
+          <label htmlFor="contact_no" className="mb-2 block text-sm font-medium">
             Contact number
           </label>
           <div className="relative">
             <input
-              id="contact"
+              id="contact_no"
               name="contact_no"
               type="text"
-              defaultValue={seller.contact_no}
+              defaultValue={seller.contact_no ?? ''}
               placeholder="+44 7xxx xxx xxx"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              aria-describedby="contact-error"
+              aria-describedby="contact_no-error"
             />
             <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
           </div>
 
-          <div id="contact-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.contact?.map((error: string) => (
+          <div id="contact_no-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.contact?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -128,14 +132,11 @@ export default function EditSellerProfileForm({
               id="date"
               name="date"
               type="date"
-              // If created_at comes back as a Date, convert before passing here.
-              // If it's already "YYYY-MM-DD", you're good.
               defaultValue={
                 seller.created_at
                   ? new Date(seller.created_at).toISOString().slice(0, 10)
                   : ''
               }
-
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="date-error"
             />
@@ -143,7 +144,7 @@ export default function EditSellerProfileForm({
           </div>
 
           <div id="date-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.date?.map((error: string) => (
+            {state.errors?.date?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -161,7 +162,7 @@ export default function EditSellerProfileForm({
               id="story"
               name="story"
               rows={5}
-              defaultValue={seller.story}
+              defaultValue={seller.story ?? ''}
               placeholder="Tell customers about your craftsmanship, inspiration, and what makes your work unique..."
               className="peer block w-full resize-none rounded-md border border-gray-200 py-2 pl-10 pr-3 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="story-error"
@@ -170,7 +171,7 @@ export default function EditSellerProfileForm({
           </div>
 
           <div id="story-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.story?.map((error: string) => (
+            {state.errors?.story?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -180,9 +181,9 @@ export default function EditSellerProfileForm({
 
         {/* Message */}
         <div aria-live="polite" aria-atomic="true">
-          {state.message && (
+          {state.message ? (
             <p className="mt-2 text-sm text-red-500">{state.message}</p>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -198,3 +199,4 @@ export default function EditSellerProfileForm({
     </form>
   );
 }
+

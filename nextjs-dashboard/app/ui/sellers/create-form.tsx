@@ -15,7 +15,7 @@ import type { SellerField } from '@/app/lib/definitions';
 import { createSeller, type State } from '@/app/lib/sactions';
 
 export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
-  const initialState: State = { message: null, errors: {} };
+  const initialState: State = { message: '', errors: {} };
   const [state, formAction] = useActionState(createSeller, initialState);
 
   return (
@@ -84,7 +84,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
         {/* Contact */}
         <div className="mb-4">
           <label htmlFor="contact" className="mb-2 block text-sm font-medium">
-            Contact number
+            Contact Number
           </label>
           <div className="relative">
             <input
@@ -105,7 +105,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
               </p>
             ))}
           </div>
-        </div>
+        </div>pnp
 
         {/* Date */}
         <div className="mb-4">
