@@ -1,7 +1,7 @@
 export default function SellerProductsPage() {
   return (
     <div className="max-w-5xl">
-      <h1 className="text-2xl font-semibold">My Products</h1>
+      <h1 className="text-2xl font-semibold">Sellers Profile</h1>
       <p className="mt-2 text-gray-600">
         Manage your curated collection and update product descriptions.
       </p>

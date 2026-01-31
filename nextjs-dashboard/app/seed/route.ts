@@ -80,6 +80,21 @@ async function seedCustomers() {
   return insertedCustomers;
 }
 
+async function seedSellers() {
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS sellers (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      seller_id TEXT NOT NULL,
+      email TEXT NOT NULL,
+      contact_no TEXT NOT NULL,
+      created_at DATE NOT NULL,
+      story TEXT NOT NULL
+    );
+  `;
+}
+
 async function seedRevenue() {
   await sql`
     CREATE TABLE IF NOT EXISTS revenue (
@@ -103,9 +118,10 @@ async function seedRevenue() {
 
 export async function GET() {
   try {
-    const result = await sql.begin((sql) => [
+    await sql.begin((sql) => [
       seedUsers(),
       seedCustomers(),
+      seedSellers(),
       seedInvoices(),
       seedRevenue(),
     ]);
