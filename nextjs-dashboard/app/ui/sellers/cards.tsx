@@ -60,6 +60,4 @@ export function SellerCard({
       </p>
     </div>
   );
-}
-
-  
+} 

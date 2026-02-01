@@ -1,4 +1,4 @@
-export default function ProductReviewsPage() {
+export default function ProductPage() {
     return (
       <div className="max-w-5xl">
         <h1 className="text-2xl font-semibold">Product Reviews</h1>
@@ -12,4 +12,7 @@ export default function ProductReviewsPage() {
       </div>
     );
   }
+
+  <Link href={`/dashboard/sellers/profile/${seller.id}/reviews`}>Reviews</Link>
+
   
