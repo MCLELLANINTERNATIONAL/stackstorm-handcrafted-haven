@@ -28,6 +28,7 @@ export type SellersTableType = {
   email: string;
   contact_no: string;
   created_at: string; // or Date
+  story: string;
 };
 
 export type SellerForm = {

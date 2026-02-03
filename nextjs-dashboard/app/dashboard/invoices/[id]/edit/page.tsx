@@ -8,19 +8,23 @@ export const metadata: Metadata = {
   title: 'Edit Invoices',
 };
 
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-    const params = await props.params;
-    const id = params.id;
-    const [invoice, customers] = await Promise.all([
-        fetchInvoiceById(id),
-        fetchCustomers(),
-      ]);
-    
-    if (!invoice) {
-      notFound();
-    }
-  
-    return (
+type PageProps = {
+  params: { id: string };
+};
+
+export default async function Page({ params }: PageProps) {
+  const id = params.id;
+
+  const [invoice, customers] = await Promise.all([
+    fetchInvoiceById(id),
+    fetchCustomers(),
+  ]);
+
+  if (!invoice) {
+    notFound();
+  }
+
+  return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
