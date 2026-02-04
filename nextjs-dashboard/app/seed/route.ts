@@ -83,6 +83,8 @@ async function seedSellers() {
     CREATE TABLE IF NOT EXISTS sellers (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       seller_id TEXT NOT NULL,
+      seller_name TEXT NOT NULL,
+      category TEXT NOT NULL,
       email TEXT NOT NULL,
       contact_no TEXT NOT NULL,
       created_at DATE NOT NULL,
