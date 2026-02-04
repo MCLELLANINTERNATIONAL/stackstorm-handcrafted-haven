@@ -11,6 +11,8 @@ export async function fetchSellers() {
       SELECT
         id,
         seller_id,
+        seller_name,
+        category, 
         email,
         contact_no,
         created_at,
