@@ -7,7 +7,7 @@ import ProductCard from "@/app/ui/catalog/product-card";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Categories",
+  title: "Products",
 };
 
 export default function Page() {
@@ -23,7 +23,7 @@ export default function Page() {
       <div className="w-full bg-gray-100 p-2 rounded">
         <div className="flex w-full items-center justify-between">
           <h1 className={`${lusitana.className} text-2xl text-sky-800`}>
-            Categories
+            Products
           </h1>
         </div>
         {/* <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
