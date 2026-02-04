@@ -22,7 +22,7 @@ export default async function Page({ params }: PageProps) {
 
   if (!invoice) {
     notFound();
-  }
+  } 
 
   return (
     <main>

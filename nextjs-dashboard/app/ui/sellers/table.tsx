@@ -61,17 +61,16 @@ export default function SellersTable({ sellers }: { sellers: SellersTableType[] 
                     <div className="flex justify-end gap-3">
                       {/* New: View profile */}
                       <Link
-                        href={`/dashboard/sellers/${seller.id}`}
-                        className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-gray-50"
+                        href={`/dashboard/sellers/profile/${seller.id}`}
+                        className="text-sm text-blue-600 hover:underline"
                       >
-                        View
+                        View Profile
                       </Link>
 
-                      {/* Existing actions */}
                       <UpdateSeller id={seller.id} />
                       <DeleteSeller id={seller.id} />
                     </div>
-                  </td>
+                  </td>p
                 </tr>
               ))}
 

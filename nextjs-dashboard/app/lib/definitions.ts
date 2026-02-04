@@ -25,6 +25,8 @@ export type SellerField = {
 export type SellersTableType = {
   id: string;
   seller_id: string;
+  seller_name: string;
+  category: string;
   email: string;
   contact_no: string;
   created_at: string; // or Date
@@ -34,6 +36,8 @@ export type SellersTableType = {
 export type SellerForm = {
   id: string;
   seller_id: string;
+  seller_name: string;
+  category: string;
   email: string;
   contact_no: string;
   created_at:  Date | string;
