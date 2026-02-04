@@ -33,7 +33,7 @@ export default async function Page({
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Sellers', href: '/dashboard/sellers' },
-          { label: 'Profile', href: '/dashboard/sellers/profile' },
+          { label: 'Profile', href: '/dashboard/sellers/profile/' },
           {
             label: 'Edit',
             href: `/dashboard/sellers/profile/${id}/edit`,
