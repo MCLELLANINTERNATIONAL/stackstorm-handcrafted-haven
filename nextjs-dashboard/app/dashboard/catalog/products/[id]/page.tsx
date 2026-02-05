@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Search from "@/app/ui/search";
 import Link from "next/link";
 import Image from "next/image";
-import ProductCard from "@/app/ui/catalog/product-card";
+// import ProductCard from "@/app/ui/catalog/product-card";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -30,12 +30,7 @@ export default function Page() {
           <Search placeholder="Search products..." />
         </div> */}
         <div className="mt-6 mx-auto flex flex-wrap ml:grid grid-cols-3 gap-4">
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
+          {/* <ProductCard sellerDetails={productsDatails} /> */}
         </div>
       </div>
     </>

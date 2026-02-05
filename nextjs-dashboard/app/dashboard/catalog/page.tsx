@@ -1,9 +1,7 @@
 import { lusitana } from "@/app/ui/fonts";
 import { Suspense } from "react";
 import Search from "@/app/ui/search";
-import Link from "next/link";
-import Image from "next/image";
-import ProductCard from "@/app/ui/catalog/product-card";
+import CategoryCard from "@/app/ui/catalog/category-card";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,13 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  const productsDatails = {
-    name: "Merry Christmas",
-    imagePath: "/products/christmas/c10.jpeg",
-    address: "Sweden",
-    id: "1",
-  };
-
   return (
     <>
       <div className="w-full bg-gray-100 p-2 rounded">
@@ -30,12 +21,7 @@ export default function Page() {
           <Search placeholder="Search products..." />
         </div> */}
         <div className="mt-6 mx-auto flex flex-wrap ml:grid grid-cols-3 gap-4">
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
-          <ProductCard sellerDetails={productsDatails} />
+          <CategoryCard />
         </div>
       </div>
     </>
