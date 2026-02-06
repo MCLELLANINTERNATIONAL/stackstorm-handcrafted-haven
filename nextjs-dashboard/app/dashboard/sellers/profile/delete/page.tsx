@@ -29,8 +29,8 @@ export default async function DeleteProfilePage({
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Sellers', href: '/dashboard/sellers' },
-          { label: 'Profile', href: `/dashboard/sellers/profile/${id}` },
-          { label: 'Delete', href: `/dashboard/sellers/profile/${id}/delete`, active: true },
+          { label: 'Profile', href: `/dashboard/sellers/profile/${seller.id}` },
+          { label: 'Delete', href: `/dashboard/sellers/profile/${seller.id}/delete`, active: true },
         ]}
       />
 

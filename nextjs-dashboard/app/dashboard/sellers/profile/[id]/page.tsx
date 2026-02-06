@@ -5,18 +5,28 @@ import { notFound } from 'next/navigation';
 import { fetchSellerById } from '@/app/lib/seller-data';
 import { formatDateToLocal } from '@/app/lib/utils';
 import ReviewForm from '@/app/ui/sellers/review-form';
-import { fetchSellerReviewsBySellerId, fetchSellerAverageRating } from '@/app/lib/review-data';
-
-type PageProps = {
-  params: { id: string };
-};
+import {
+  fetchSellerReviewsBySellerId,
+  fetchSellerAverageRating,
+} from '@/app/lib/review-data';
 
 function stars(rating: number) {
   return '★'.repeat(rating) + '☆'.repeat(5 - rating);
 }
 
-export default async function SellerProfilePage({ params }: PageProps) {
-  const seller = await fetchSellerById(params.id);
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default async function SellerProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  if (!id) notFound();
+
+  const seller = await fetchSellerById(id);
   if (!seller) notFound();
 
   const [reviews, avg] = await Promise.all([
@@ -25,15 +35,14 @@ export default async function SellerProfilePage({ params }: PageProps) {
   ]);
 
   const createdAt =
-    (seller as any).created_at
-      ? typeof (seller as any).created_at === 'string'
-        ? (seller as any).created_at
-        : (seller as any).created_at.toISOString()
+    seller.created_at
+      ? typeof seller.created_at === 'string'
+        ? seller.created_at
+        : seller.created_at.toISOString()
       : null;
 
   return (
     <main className="mx-auto max-w-6xl p-6">
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Seller Profile</h1>
 
@@ -45,9 +54,7 @@ export default async function SellerProfilePage({ params }: PageProps) {
         </Link>
       </div>
 
-      {/* Seller info section */}
       <section className="mb-10 flex flex-col gap-6 md:flex-row">
-        {/* Image */}
         <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl border bg-gray-100">
           <Image
             src="/images/placeholder-seller.jpg"
@@ -59,7 +66,6 @@ export default async function SellerProfilePage({ params }: PageProps) {
           />
         </div>
 
-        {/* Details */}
         <div className="flex-1">
           <h2 className="text-3xl font-semibold">{seller.seller_name}</h2>
 
@@ -69,7 +75,6 @@ export default async function SellerProfilePage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {/* Story */}
           <div className="mt-4">
             <h3 className="text-sm font-semibold">Story</h3>
             {seller.story ? (
@@ -83,7 +88,6 @@ export default async function SellerProfilePage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Contact */}
           <div className="mt-4">
             <h3 className="text-sm font-semibold">Contact</h3>
             <p className="mt-1 text-sm">{seller.email}</p>
@@ -92,11 +96,9 @@ export default async function SellerProfilePage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Reviews section */}
       <section>
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-xl font-semibold">Customer Reviews</h2>
-
           <div className="rounded-full bg-gray-50 px-4 py-2 text-sm">
             Average Rating:{' '}
             <span className="font-semibold">
@@ -133,9 +135,9 @@ export default async function SellerProfilePage({ params }: PageProps) {
           </div>
         )}
 
-        {/* Add review */}
         <ReviewForm sellerId={seller.id} />
       </section>
     </main>
   );
 }
+
