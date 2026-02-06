@@ -19,30 +19,40 @@ export type Customer = {
 // Seller types
 export type SellerField = {
   id: string;
-  seller_id: string;
+  seller_name: string;
 };
 
 export type SellersTableType = {
   id: string;
-  seller_id: string;
   seller_name: string;
   category: string;
   email: string;
-  contact_no: string;
-  created_at: string; // or Date
+  contact_no: string | null;
+  created_at: string; 
+  story: string | null;
+};
+
+
+// Used for edit forms / fetchSellerById
+export type SellerForm = {
+  id: string;
+  seller_name: string;
+  category: string;
+  email: string;
+  contact_no: string | null;
+  created_at: Date | string; 
+  story: string | null;
+};
+
+// Used for createSeller action (no id, no created_at)
+export type CreateSellerInput = {
+  seller_name: string;
+  category: string;
+  email: string;
+  contact_no?: string | null;
   story: string;
 };
 
-export type SellerForm = {
-  id: string;
-  seller_id: string;
-  seller_name: string;
-  category: string;
-  email: string;
-  contact_no: string;
-  created_at:  Date | string;
-  story: string;
-};
 
 export type Invoice = {
   id: string;

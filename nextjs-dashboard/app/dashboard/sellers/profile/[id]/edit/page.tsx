@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 
 import Breadcrumbs from '@/app/ui/sellers/breadcrumbs';
 import EditSellerProfileForm from '@/app/ui/sellers/edit-form';
-import { fetchSellerById, fetchSellers } from '@/app/lib/seller-data';
+import { fetchSellerById } from '@/app/lib/seller-data';
 
 export const metadata: Metadata = {
   title: 'Edit Seller Profile',
@@ -12,19 +12,12 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function Page({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;
 
   if (!id) notFound();
 
-  const [seller, sellers] = await Promise.all([
-    fetchSellerById(id),
-    fetchSellers(),
-  ]);
+  const seller = await fetchSellerById(id);
 
   if (!seller) notFound();
 
@@ -33,7 +26,7 @@ export default async function Page({
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Sellers', href: '/dashboard/sellers' },
-          { label: 'Profile', href: '/dashboard/sellers/profile/' },
+          { label: 'Profile', href: '/dashboard/sellers/profile' },
           {
             label: 'Edit',
             href: `/dashboard/sellers/profile/${id}/edit`,
@@ -48,7 +41,7 @@ export default async function Page({
       </p>
 
       <div className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
-        <EditSellerProfileForm seller={seller} sellers={sellers} />
+        <EditSellerProfileForm seller={seller} />
       </div>
     </main>
   );

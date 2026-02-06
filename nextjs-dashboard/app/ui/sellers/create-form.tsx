@@ -6,22 +6,20 @@ import {
   UserCircleIcon,
   EnvelopeIcon,
   PhoneIcon,
-  CalendarDaysIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/app/ui/button';
-import type { SellerField } from '@/app/lib/definitions';
-import { createSeller, type State } from '@/app/lib/sactions';
+import { createSeller, type State } from '@/app/lib/seller-actions';
 
-export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
+export default function SellerForm() {
   const initialState: State = { message: '', errors: {} };
   const [state, formAction] = useActionState(createSeller, initialState);
 
   return (
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Seller Name (required for creating a new seller/profile) */}
+        {/* Seller Name */}
         <div className="mb-4">
           <label htmlFor="sellerName" className="mb-2 block text-sm font-medium">
             Seller name
@@ -39,7 +37,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="sellerName-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.sellerName?.map((error: string) => (
+            {state.errors?.sellerName?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -68,14 +66,15 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
               <option value="art">Art</option>
               <option value="christmas">Christmas</option>
               <option value="lamp_shades">Lamp Shades</option>
-              <option value="crochet">Crochet & Knitwear</option>
+              <option value="crochet">Crochet</option>
+              <option value="knitwear">Knitwear</option>
             </select>
 
             <PencilSquareIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
           </div>
 
           <div id="category-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.category?.map((error: string) => (
+            {state.errors?.category?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -101,7 +100,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="email-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.email?.map((error: string) => (
+            {state.errors?.email?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -127,32 +126,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="contact-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.contact?.map((error: string) => (
-              <p className="mt-2 text-sm text-red-500" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Date */}
-        <div className="mb-4">
-          <label htmlFor="date" className="mb-2 block text-sm font-medium">
-            Date created
-          </label>
-          <div className="relative">
-            <input
-              id="date"
-              name="date"
-              type="date"
-              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              aria-describedby="date-error"
-            />
-            <CalendarDaysIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-
-          <div id="date-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.date?.map((error: string) => (
+            {state.errors?.contact?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -178,7 +152,7 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
           </div>
 
           <div id="story-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.story?.map((error: string) => (
+            {state.errors?.story?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -204,3 +178,4 @@ export default function SellerForm({ sellers }: { sellers: SellerField[] }) {
     </form>
   );
 }
+

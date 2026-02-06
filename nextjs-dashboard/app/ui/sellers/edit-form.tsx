@@ -6,27 +6,25 @@ import {
   UserCircleIcon,
   EnvelopeIcon,
   PhoneIcon,
-  CalendarDaysIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/app/ui/button';
-import type { SellerField, SellerForm } from '@/app/lib/definitions';
-import { updateSeller, type State } from '@/app/lib/sactions';
+import type { SellerForm } from '@/app/lib/definitions';
+import { updateSeller, type State } from '@/app/lib/seller-actions';
 
-export default function EditSellerProfileForm({
-  seller,
-  sellers,
-}: {
-  seller: SellerForm;
-  sellers: SellerField[];
-}) {
-  // message must be a string AND errors must always exist
+/**
+ * MATCHES NEW sactions.ts
+ * - updateSeller(id, prevState, formData) expects form fields:
+ *   sellerName, category, email, contact, story
+ * - Postgres generates sellers.id and created_at (no seller_id, no date field)
+ */
+export default function EditSellerProfileForm({ seller }: { seller: SellerForm }) {
   const initialState: State = { message: '', errors: {} };
 
-  // Avoid bind() overload issues by using an inline wrapper
   const action = async (prevState: State, formData: FormData) => {
-    return updateSeller(seller.id, prevState, formData);
+    // ✅ Uses ONLY Postgres-generated UUID
+    return updateSeller(seller.id!, prevState, formData);
   };
 
   const [state, formAction] = useActionState(action, initialState);
@@ -34,36 +32,67 @@ export default function EditSellerProfileForm({
   return (
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Seller */}
+        {/* Seller Name */}
         <div className="mb-4">
-          <label htmlFor="seller" className="mb-2 block text-sm font-medium">
-            Seller ID
+          <label htmlFor="sellerName" className="mb-2 block text-sm font-medium">
+            Seller name
           </label>
           <div className="relative">
-            <select
-              id="seller"
-              name="sellerId"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={seller.seller_id ?? ''}
-              aria-describedby="sellerId-error"
-            >
-              <option value="" disabled>
-                Select a seller
-              </option>
-              {sellers.map((s) => (
-                <option key={s.id} value={s.seller_id}>
-                  {s.seller_id}
-                </option>
-              ))}
-            </select>
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+            <input
+              id="sellerName"
+              name="sellerName"
+              type="text"
+              defaultValue={seller.seller_name ?? ''}
+              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              aria-describedby="sellerName-error"
+            />
+            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
           </div>
 
-          <div aria-live="polite" aria-atomic="true">
-            {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
-              ) : null}
+          <div id="sellerName-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.sellerName?.map((error) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
+          </div>
         </div>
+
+        {/* Category */}
+        <div className="mb-4">
+          <label htmlFor="category" className="mb-2 block text-sm font-medium">
+            Category
+          </label>
+
+          <div className="relative">
+            <select
+              id="category"
+              name="category"
+              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              defaultValue={seller.category ?? ''}
+              aria-describedby="category-error"
+            >
+              <option value="" disabled>
+                Select a category
+              </option>
+              <option value="wood">Wood</option>
+              <option value="art">Art</option>
+              <option value="christmas">Christmas</option>
+              <option value="lamp_shades">Lamp Shades</option>
+              <option value="crochet">Crochet</option>
+              <option value="knitwear">Knitwear</option>
+            </select>
+
+            <PencilSquareIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          </div>
+
+          <div id="category-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.category?.map((error) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+            ))}
+          </div>
         </div>
 
         {/* Email */}
@@ -95,54 +124,24 @@ export default function EditSellerProfileForm({
 
         {/* Contact */}
         <div className="mb-4">
-          <label htmlFor="contact_no" className="mb-2 block text-sm font-medium">
+          <label htmlFor="contact" className="mb-2 block text-sm font-medium">
             Contact number
           </label>
           <div className="relative">
             <input
-              id="contact_no"
-              name="contact_no"
+              id="contact"
+              name="contact"
               type="text"
               defaultValue={seller.contact_no ?? ''}
               placeholder="+44 7xxx xxx xxx"
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              aria-describedby="contact_no-error"
+              aria-describedby="contact-error"
             />
             <PhoneIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
           </div>
 
-          <div id="contact_no-error" aria-live="polite" aria-atomic="true">
+          <div id="contact-error" aria-live="polite" aria-atomic="true">
             {state.errors?.contact?.map((error) => (
-              <p className="mt-2 text-sm text-red-500" key={error}>
-                {error}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Date */}
-        <div className="mb-4">
-          <label htmlFor="date" className="mb-2 block text-sm font-medium">
-            Date created
-          </label>
-          <div className="relative">
-            <input
-              id="date"
-              name="date"
-              type="date"
-              defaultValue={
-                seller.created_at
-                  ? new Date(seller.created_at).toISOString().slice(0, 10)
-                  : ''
-              }
-              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              aria-describedby="date-error"
-            />
-            <CalendarDaysIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-
-          <div id="date-error" aria-live="polite" aria-atomic="true">
-            {state.errors?.date?.map((error) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
@@ -178,16 +177,16 @@ export default function EditSellerProfileForm({
         </div>
 
         {/* Message */}
-        <div aria-live="polite" aria-atomic="true">
-          {state.message ? (
-            <p className="mt-2 text-sm text-red-500">{state.message}</p>
-          ) : null}
-        </div>
+        {state.message ? (
+          <p className="mt-2 text-sm text-red-500" aria-live="polite" aria-atomic="true">
+            {state.message}
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-6 flex justify-end gap-4">
         <Link
-          href="/dashboard/sellers/profile"
+          href="/dashboard/sellers"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
           Cancel
