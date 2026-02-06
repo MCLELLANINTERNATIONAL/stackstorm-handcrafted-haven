@@ -31,6 +31,28 @@ export default function EditSellerProfileForm({ seller }: { seller: SellerForm }
 
   return (
     <form action={formAction}>
+      <div className="mb-4">
+  <label htmlFor="imageUrl" className="mb-2 block text-sm font-medium">
+    Profile image URL (optional)
+  </label>
+  <input
+    id="imageUrl"
+    name="imageUrl"
+    type="text"
+    defaultValue={seller.image_url ?? ''}
+    placeholder="/sellers/placeholder-seller.jpg or https://..."
+    className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+    aria-describedby="imageUrl-error"
+  />
+  <div id="imageUrl-error" aria-live="polite" aria-atomic="true">
+    {state.errors?.imageUrl?.map((error: string) => (
+      <p className="mt-2 text-sm text-red-500" key={error}>
+        {error}
+      </p>
+    ))}
+  </div>
+</div>
+
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Seller Name */}
         <div className="mb-4">

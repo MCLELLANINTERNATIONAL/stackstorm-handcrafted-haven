@@ -30,6 +30,7 @@ export type SellersTableType = {
   contact_no: string | null;
   created_at: string; 
   story: string | null;
+  image_url: string | null;
 };
 
 
@@ -42,6 +43,8 @@ export type SellerForm = {
   contact_no: string | null;
   created_at: Date | string; 
   story: string | null;
+  tory: string | null;
+  image_url: string | null;
 };
 
 // Used for createSeller action (no id, no created_at)
@@ -51,6 +54,7 @@ export type CreateSellerInput = {
   email: string;
   contact_no?: string | null;
   story: string;
+  image_url?: string | null;
 };
 
 

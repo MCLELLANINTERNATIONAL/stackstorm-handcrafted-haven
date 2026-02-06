@@ -22,7 +22,8 @@ export async function fetchSellers() {
         email,
         contact_no,
         created_at,
-        story
+        story,
+        image_url
       FROM sellers
       ORDER BY seller_name ASC
     `;
@@ -45,7 +46,8 @@ export async function fetchFilteredSellers(query: string, currentPage: number) {
         email,
         contact_no,
         created_at,
-        story
+        story,
+        image_url
       FROM sellers
       WHERE
         seller_name ILIKE ${`%${query}%`} OR
@@ -100,7 +102,8 @@ export async function fetchSellerById(id: string) {
         email,
         contact_no,
         created_at,
-        story
+        story,
+        image_url
       FROM sellers
       WHERE id = ${id}::uuid
       LIMIT 1;

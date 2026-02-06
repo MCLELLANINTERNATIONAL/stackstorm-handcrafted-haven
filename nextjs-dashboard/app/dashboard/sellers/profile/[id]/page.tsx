@@ -56,14 +56,14 @@ export default async function SellerProfilePage({
 
       <section className="mb-10 flex flex-col gap-6 md:flex-row">
         <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl border bg-gray-100">
-          <Image
-            src="/images/placeholder-seller.jpg"
-            alt={`Seller ${seller.seller_name}`}
-            fill
-            className="object-cover"
-            sizes="224px"
-            priority
-          />
+        <Image
+          src={seller.image_url || '/sellers/placeholder-seller.jpg'}
+          alt={`Seller ${seller.seller_name}`}
+          fill
+          className="object-cover"
+          sizes="224px"
+          priority
+        />
         </div>
 
         <div className="flex-1">
