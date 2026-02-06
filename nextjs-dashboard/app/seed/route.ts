@@ -88,9 +88,11 @@ async function seedSellers() {
       contact_no TEXT,
       created_at TIMESTAMP DEFAULT NOW(),
       story TEXT
+      image_url TEXT
     );
   `;
 }
+
 
 async function seedSellerReviews() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
