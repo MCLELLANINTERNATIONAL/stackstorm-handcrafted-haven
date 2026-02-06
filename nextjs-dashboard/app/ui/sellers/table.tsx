@@ -3,7 +3,11 @@ import { formatDateToLocal } from '@/app/lib/utils';
 import { UpdateSeller, DeleteSeller } from '@/app/ui/sellers/buttons';
 import type { SellersTableType } from '@/app/lib/definitions';
 
-export default function SellersTable({ sellers }: { sellers: SellersTableType[] }) {
+export default function SellersTable({
+  sellers,
+}: {
+  sellers: SellersTableType[];
+}) {
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -12,7 +16,7 @@ export default function SellersTable({ sellers }: { sellers: SellersTableType[] 
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Seller ID
+                  Seller Name
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Email
@@ -39,27 +43,32 @@ export default function SellersTable({ sellers }: { sellers: SellersTableType[] 
                     [&:last-child>td:first-child]:rounded-bl-lg
                     [&:last-child>td:last-child]:rounded-br-lg"
                 >
-                  {/* Make seller_id clickable to the profile */}
+                  {/* Seller name links to profile page (uses DB-generated sellers.id) */}
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <Link
-                      href={`/dashboard/sellers/${seller.id}`}
+                      href={`/dashboard/sellers/profile/${seller.id}`}
                       className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-800"
                     >
-                      {seller.seller_id}
+                      {seller.seller_name}
                     </Link>
                   </td>
 
                   <td className="whitespace-nowrap px-3 py-3">{seller.email}</td>
 
-                  <td className="whitespace-nowrap px-3 py-3">{seller.contact_no}</td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {seller.contact_no ?? '—'}
+                  </td>
 
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateToLocal(seller.created_at)}
+                    {formatDateToLocal(
+                      typeof seller.created_at === 'string'
+                        ? seller.created_at
+                        : new Date(seller.created_at).toISOString(),
+                    )}
                   </td>
 
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      {/* New: View profile */}
                       <Link
                         href={`/dashboard/sellers/profile/${seller.id}`}
                         className="text-sm text-blue-600 hover:underline"
@@ -70,13 +79,16 @@ export default function SellersTable({ sellers }: { sellers: SellersTableType[] 
                       <UpdateSeller id={seller.id} />
                       <DeleteSeller id={seller.id} />
                     </div>
-                  </td>p
+                  </td>
                 </tr>
               ))}
 
               {!sellers?.length && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-8 text-center text-sm text-gray-500"
+                  >
                     No sellers found.
                   </td>
                 </tr>

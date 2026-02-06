@@ -1,4 +1,26 @@
-export default function SellerReviewsPage() {
+import { notFound } from 'next/navigation';
+import {
+  fetchSellerReviewsBySellerId,
+  fetchSellerAverageRating,
+} from '@/app/lib/review-data';
+
+function stars(rating: number) {
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+
+export default async function SellerReviewsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const sellerId = params.id;
+  if (!sellerId) notFound();
+
+  const [reviews, avg] = await Promise.all([
+    fetchSellerReviewsBySellerId(sellerId),
+    fetchSellerAverageRating(sellerId),
+  ]);
+
   return (
     <div className="max-w-5xl">
       <h1 className="text-2xl font-semibold">Seller Reviews</h1>
@@ -8,45 +30,44 @@ export default function SellerReviewsPage() {
 
       <div className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold">Latest Reviews</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Replace this placeholder with your database query + UI later.
-            </p>
-          </div>
+          <h2 className="text-lg font-semibold">Latest Reviews</h2>
 
           <div className="rounded-full bg-gray-50 px-4 py-2 text-sm">
-            Average Rating: <span className="font-semibold">4.8</span>
+            Average Rating:{' '}
+            <span className="font-semibold">
+              {avg === null ? '—' : avg.toFixed(1)}
+            </span>
           </div>
         </div>
 
         <div className="mt-6 space-y-4">
-          {/* Review Card */}
-          <div className="rounded-xl border p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-medium">Review Title Placeholder</p>
-                <p className="text-sm text-gray-600">by Customer A • Jan 2026</p>
-              </div>
-              <div className="text-sm font-semibold">★★★★★</div>
-            </div>
-            <p className="mt-3 text-sm text-gray-700">
-              Replace this text with your database comment later.
-            </p>
-          </div>
+          {reviews.length === 0 ? (
+            <p className="text-sm text-gray-600">No reviews yet.</p>
+          ) : (
+            reviews.map((r) => (
+              <div key={r.id} className="rounded-xl border p-4">
+                <div className="flex justify-between gap-4">
+                  <div>
+                    <p className="font-medium">
+                      {r.product_name ?? 'Product'}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {r.customer_name ? `by ${r.customer_name} • ` : ''}
+                      {new Date(r.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
 
-          <div className="rounded-xl border p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-medium">Another Review Placeholder</p>
-                <p className="text-sm text-gray-600">by Customer B • Jan 2026</p>
+                  <div className="text-sm font-semibold">
+                    {stars(r.rating)}
+                  </div>
+                </div>
+
+                {r.comment && (
+                  <p className="mt-3 text-sm text-gray-700">{r.comment}</p>
+                )}
               </div>
-              <div className="text-sm font-semibold">★★★★☆</div>
-            </div>
-            <p className="mt-3 text-sm text-gray-700">
-              Replace this placeholder with your database comment later.
-            </p>
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 
 import Breadcrumbs from '@/app/ui/sellers/breadcrumbs';
 import SellerForm from '@/app/ui/sellers/create-form';
-import { fetchSellers } from '@/app/lib/seller-data';
 
 export const metadata: Metadata = {
   title: 'Create Seller Profile',
@@ -13,8 +12,6 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function Page() {
-  const sellers = await fetchSellers();
-
   return (
     <main className="max-w-4xl">
       <Breadcrumbs
@@ -34,9 +31,10 @@ export default async function Page() {
       </p>
 
       <div className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
-        <SellerForm sellers={sellers} />
+        <SellerForm />
       </div>
     </main>
   );
 }
+
  

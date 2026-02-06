@@ -82,13 +82,28 @@ async function seedSellers() {
   await sql`
     CREATE TABLE IF NOT EXISTS sellers (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      seller_id TEXT NOT NULL,
       seller_name TEXT NOT NULL,
       category TEXT NOT NULL,
-      email TEXT NOT NULL,
-      contact_no TEXT NOT NULL,
-      created_at DATE NOT NULL,
-      story TEXT NOT NULL
+      email TEXT NOT NULL UNIQUE,
+      contact_no TEXT,
+      created_at TIMESTAMP DEFAULT NOW(),
+      story TEXT
+    );
+  `;
+}
+
+async function seedSellerReviews() {
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS seller_reviews (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      seller_id UUID NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
+      rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+      comment TEXT,
+      created_at TIMESTAMP DEFAULT NOW(),
+      product_name TEXT,
+      customer_name TEXT
     );
   `;
 }
@@ -118,6 +133,7 @@ export async function GET() {
       seedUsers(),
       seedCustomers(),
       seedSellers(),
+      seedSellerReviews(),
       seedInvoices(),
       seedRevenue(),
     ]);
