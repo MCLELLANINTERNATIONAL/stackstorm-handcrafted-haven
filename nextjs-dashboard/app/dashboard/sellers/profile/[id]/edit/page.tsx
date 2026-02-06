@@ -12,8 +12,12 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const id = params.id;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
   if (!id) notFound();
 
@@ -21,16 +25,18 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   if (!seller) notFound();
 
+  // Prefer whichever id your seller object actually has
+  const sellerId = (seller as any).id ?? (seller as any).seller_id ?? id;
+
   return (
     <main className="max-w-4xl">
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Sellers', href: '/dashboard/sellers' },
-          { label: 'Profile', href: `/dashboard/sellers/profile/${seller.id}`
-        },
+          { label: 'Profile', href: `/dashboard/sellers/profile/${sellerId}` },
           {
             label: 'Edit',
-            href: `/dashboard/sellers/profile/${seller.id}/edit`,
+            href: `/dashboard/sellers/profile/${sellerId}/edit`,
             active: true,
           },
         ]}
