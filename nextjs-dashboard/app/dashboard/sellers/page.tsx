@@ -12,7 +12,7 @@ export default async function Page() {
     <main className="max-w-5xl p-6">
       <h1 className="text-2xl font-semibold">Seller Directory</h1>
       <p className="mt-2 text-gray-600">
-        Share your craftsmanship, your story, and what makes your work unique.
+        Discover our artisans craftsmanship, stories, and what makes their work unique.
       </p>
 
       <div className="mt-6">
