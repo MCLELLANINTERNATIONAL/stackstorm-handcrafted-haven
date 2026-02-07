@@ -87,7 +87,7 @@ export default function SellerForm() {
               <option value="wood">Wood</option>
               <option value="art">Art</option>
               <option value="christmas">Christmas</option>
-              <option value="lamp_shades">Lamp Shades</option>
+              <option value="home">Home</option>
               <option value="crochet">Crochet & Knitwear</option>
             </select>
 
