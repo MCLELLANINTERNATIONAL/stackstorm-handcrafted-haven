@@ -20,8 +20,8 @@ export default function CategoryCard() {
     },
     {
       name: "Home",
-      imagePath: "/products/wood/ls5.png",
-      description: "Beautiful hand made home products. ",
+      imagePath: "/products/home/ls11.png",
+      description: "Beautiful hand made home products.",
       id: "3",
     },
     {
