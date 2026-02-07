@@ -10,7 +10,7 @@ import postgres from 'postgres';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const CategoryEnum = z.enum(
-  ['wood', 'art', 'christmas', 'lamp_shades', 'crochet', 'knitwear'],
+  ['wood', 'art', 'christmas', 'home', 'crochet', 'knitwear'],
   { message: 'Please select a category.' },
 );
 
