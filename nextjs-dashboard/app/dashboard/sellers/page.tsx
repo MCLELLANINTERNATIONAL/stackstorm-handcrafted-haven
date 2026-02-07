@@ -1,12 +1,30 @@
+import Link from 'next/link';
 import type { Metadata } from 'next';
-import { fetchSellers } from '@/app/lib/seller-data';
+
+import Search from '@/app/ui/search';
+import Pagination from '@/app/ui/sellers/pagination';
 import SellersTable from '@/app/ui/sellers/table';
+
+import {
+  fetchFilteredSellers,
+  fetchSellersPages,
+} from '@/app/lib/seller-data';
 
 export const metadata: Metadata = { title: 'Sellers' };
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export default async function Page() {
-  const sellers = await fetchSellers();
+export default async function Page(props: {
+  searchParams?: Promise<{ query?: string; page?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const query = searchParams?.query ?? '';
+  const currentPage = Number(searchParams?.page ?? '1');
+
+  const [sellers, totalPages] = await Promise.all([
+    fetchFilteredSellers(query, currentPage),
+    fetchSellersPages(query),
+  ]);
 
   return (
     <main className="max-w-5xl p-6">
@@ -15,10 +33,25 @@ export default async function Page() {
         Discover our artisans craftsmanship, stories, and what makes their work unique.
       </p>
 
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <Search placeholder="Search seller..." />
+
+        {/* Create button */}
+        <Link
+          href="/dashboard/sellers/profile/create"
+          className="inline-flex h-10 cursor-pointer items-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white transition-colors hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+      >
+        Create Seller Profile +
+      </Link>
+      </div>
+
       <div className="mt-6">
         <SellersTable sellers={sellers} />
+      </div>
+
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
       </div>
     </main>
   );
 }
-
