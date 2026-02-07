@@ -15,7 +15,7 @@ export default function CategoryCard() {
       name: "Crochet & Knitted",
       imagePath: "/products/crochet_knitted/ck2.png",
       description:
-        "Amazing crafted crochet knitted items for you, family, and friends.",
+        "Amazing crafted crochet and knitted items for you, family, and friends.",
       id: "2",
     },
     {

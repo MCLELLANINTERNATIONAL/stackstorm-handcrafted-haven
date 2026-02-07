@@ -101,7 +101,7 @@ export default function EditSellerProfileForm({ seller }: { seller: SellerForm }
               <option value="art">Art</option>
               <option value="christmas">Christmas</option>
               <option value="home">Home</option>
-              <option value="crochet-knitted">Crochet & Knitted</option>
+              <option value="crochet-knitted">Crochet-Knitted</option>
               
             </select>
 
