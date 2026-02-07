@@ -88,7 +88,7 @@ export default function SellerForm() {
               <option value="art">Art</option>
               <option value="christmas">Christmas</option>
               <option value="home">Home</option>
-              <option value="crochet">Crochet & Knitwear</option>
+              <option value="crochet-knitted">Crochet & Knitted</option>
             </select>
 
             <PencilSquareIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />

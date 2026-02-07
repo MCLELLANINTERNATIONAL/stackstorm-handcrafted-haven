@@ -1,9 +1,6 @@
 import { lusitana, inter } from "@/app/ui/fonts";
 import Link from "next/link";
 import Image from "next/image";
-import DiscountTag from "./discount-tag";
-import { Button } from "../button";
-import PriceTag from "./price-tag";
 
 export default function CategoryCard() {
   const categories = [
@@ -11,34 +8,34 @@ export default function CategoryCard() {
       name: "Christmas",
       imagePath: "/products/christmas/c10.jpeg",
       description:
-        "Uniquely crafted christmas items for a beautiful season. Bring the spirit of christmas to your home.",
+        "Uniquely crafted christmas items for the festive season. Bringing the spirit of christmas into your home.",
       id: "1",
     },
     {
-      name: "Crochet Knitted",
+      name: "Crochet & Knitted",
       imagePath: "/products/crochet_knitted/ck2.png",
       description:
-        "Amazing crafted crochet knitted piece for you, family, and friends.",
+        "Amazing crafted crochet knitted items for you, family, and friends.",
       id: "2",
     },
     {
-      name: "Woods",
+      name: "Home",
       imagePath: "/products/wood/ls5.png",
-      description: "Beautiful wood craft for home and offices decorations ",
+      description: "Beautiful hand made home products. ",
       id: "3",
     },
     {
       name: "Arts",
-      imagePath: "/products/christmas/c5.jpeg",
+      imagePath: "/products/arts/a1.png",
       description:
-        "Inspired painting of some of the greatest mind ever lived. Embrace the beauty of creativity. ",
+        "Inspired paintings of some of the worls greatest landscapes. Embrace the beauty of Gods creation. ",
       id: "4",
     },
     {
-      name: "Carvings",
-      imagePath: "/products/christmas/c7.jpeg",
+      name: "Woods",
+      imagePath: "/products/wood/w4.png",
       description:
-        "Wonderful sculptures to fill those empty spaces at home and offices.",
+        "Beautiful wood craft for your home and office decoration.",
       id: "5",
     },
   ];
