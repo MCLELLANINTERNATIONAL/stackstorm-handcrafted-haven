@@ -6,7 +6,7 @@ export default function CategoryCard() {
   const categories = [
     {
       name: "Christmas",
-      imagePath: "/products/christmas/c10.jpeg",
+      imagePath: "/products/christmas/c15.png",
       description:
         "Uniquely crafted christmas items for the festive season. Bringing the spirit of christmas into your home.",
       id: "1",
