@@ -47,8 +47,9 @@ export default function CategoryCard() {
     <>
       {categories.map((category) => (
         <Link
-          href={`/profile/${category.id}`}
+          href={`catalog/${category.id}`}
           className="hover: cursor-pointer"
+          key={category.id}
         >
           <div className="mt-5 w-60 h-72 bg-gray-100 shadow-md shadow-gray-400 rounded-lg overflow-auto m-3 p-2 hover:scale-95 transition-all">
             <div className="rounded-lg w-full overflow-hidden h-44 relative ">
@@ -71,37 +72,6 @@ export default function CategoryCard() {
           </div>
         </Link>
       ))}
-
-      {/* {sellers.map((seller) => (
-        <Link
-          href={`/profile/${seller.id}`}
-          className="hover: cursor-pointer"
-        >
-          <div className="mt-5 w-80 bg-gray-100 shadow-md, rounded overflow-hidden m-3">
-            <Image
-              src={`${seller.imagePath}`}
-              className="mr-2"
-              width={320}
-              height={200}
-              alt={`${seller.name}'s profile picture`}
-            />
-            <div className="p-2">
-              <h2
-                className={`${lusitana.className} text-3xl`}
-              >{`${seller.name}`}</h2>
-              <h3>{`${seller.address}`}</h3>
-              <div className="flex justify-start text-sm">
-                <p className="mr-2">{`${seller.phone}`}</p>
-                <p>{`${seller.email}`}</p>
-              </div>
-              <p className="text-sm">
-                <strong>Skills:</strong>
-                {`${seller.skills}.`}
-              </p>
-            </div>
-          </div>
-        </Link>
-      ))} */}
     </>
   );
 }
