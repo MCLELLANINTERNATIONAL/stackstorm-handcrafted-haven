@@ -44,8 +44,9 @@ export default function CategoryCard() {
     <>
       {categories.map((category) => (
         <Link
+          key={category.id}
           href={`/profile/${category.id}`}
-          className="hover: cursor-pointer"
+          className="hover:cursor-pointer"
         >
           <div className="mt-5 w-60 h-72 bg-gray-100 shadow-md shadow-gray-400 rounded-lg overflow-auto m-3 p-2 hover:scale-95 transition-all">
             <div className="rounded-lg w-full overflow-hidden h-44 relative ">
