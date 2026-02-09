@@ -48,7 +48,9 @@ export default async function SellerProfilePage({
 
         <Link
           href="/dashboard/sellers"
-          className="rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+          className="rounded-md border border-green-600 bg-green-600 px-3 py-2 text-sm 
+          font-bold text-white hover:bg-blue-700 hover:border-green-700 
+          transition-colors"
         >
           Back to directory
         </Link>
@@ -99,7 +101,7 @@ export default async function SellerProfilePage({
       <section>
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-xl font-semibold">Customer Reviews</h2>
-          <div className="rounded-full bg-gray-50 px-4 py-2 text-sm">
+          <div className="rounded-full bg-yellow-200 px-4 py-2 text-sm font-bold text-black">
             Average Rating:{' '}
             <span className="font-semibold">
               {avg === null ? '—' : avg.toFixed(1)}
@@ -125,7 +127,7 @@ export default async function SellerProfilePage({
                   </p>
                 </div>
 
-                <div className="text-sm font-semibold">{stars(r.rating)}</div>
+                <div className="text-sm font-bold">{stars(r.rating)}</div>
 
                 {r.comment ? (
                   <p className="mt-2 text-sm text-gray-700">{r.comment}</p>
@@ -140,4 +142,3 @@ export default async function SellerProfilePage({
     </main>
   );
 }
-

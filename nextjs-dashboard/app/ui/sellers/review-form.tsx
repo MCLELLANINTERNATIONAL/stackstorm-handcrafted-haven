@@ -129,7 +129,8 @@ export default function ReviewForm({ sellerId }: { sellerId: string }) {
 
       <button
         type="submit"
-        className="rounded-md bg-black px-4 py-2 text-sm text-white"
+        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white
+        transition-colors hover:bg-green-600"
       >
         Submit review
       </button>
