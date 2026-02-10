@@ -146,3 +146,13 @@ export async function updateProduct(
   revalidatePath('/dashboard/products');
   redirect('/dashboard/products');
 }
+
+export async function deleteProduct(id: string) {
+  if (!id) throw new Error('Missing product id.');
+
+  await sql`
+    DELETE FROM products
+    WHERE id = ${id}::uuid
+  `;
+}
+

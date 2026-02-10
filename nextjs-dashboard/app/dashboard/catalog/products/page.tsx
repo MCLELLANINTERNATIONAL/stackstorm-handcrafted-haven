@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Search from "@/app/ui/search";
 import Link from "next/link";
 import Image from "next/image";
-import ProductCard from "@/app/ui/catalog/product-card";
+import ProductCard from "@/app/ui/products/product-card";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

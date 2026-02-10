@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import EditProductForm from '@/app/ui/product/edit-form'; // <-- this is the edit-form component
+import EditProductForm from '@/app/ui/products/edit-form'; // <-- this is the edit-form component
 import { fetchProductById } from '@/app/lib/product-data';
 
 export const dynamic = 'force-dynamic';

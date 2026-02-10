@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import ProductForm from '@/app/ui/product/create-form';
+import ProductForm from '@/app/ui/products/create-form';
 
 export const dynamic = 'force-dynamic';
 
