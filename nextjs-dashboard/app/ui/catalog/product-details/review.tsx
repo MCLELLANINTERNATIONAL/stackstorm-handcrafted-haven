@@ -37,10 +37,10 @@ export default function Review() {
 
   return (
     <>
-      <div className="">
+      <div className="my-8">
         {reviews.map((review) => (
           <div key={review.id}>
-            <div className="p-2 h-14 overflow-auto bg-gray-50 rounded-xl m-2 shadow-sm">
+            <div className="p-2 h-14 max-h-28 overflow-auto bg-gray-50 rounded-xl my-3 mx-4 shadow-sm relative group">
               <p
                 className={`${inter.className} text-gray-600 text-xs text-left`}
               >
@@ -48,22 +48,23 @@ export default function Review() {
                   className={`${lusitana.className} text-gray-800 text-sm`}
                 >
                   {`${review.name} `}
-                </strong>
+                </strong>{" "}
+                <br />
                 {`${review.message}`}
               </p>
-            </div>
-            <div className="flex m-2">
-              <button>
-                <PencilIcon className="w-3 mr-1" />
-              </button>
-              <button
-                className="w-3"
-                onClick={() => {
-                  handleDelete(review.id);
-                }}
-              >
-                <TrashIcon className="w-3 " />
-              </button>
+
+              <div className="mx-3 absolute right-3 top-1 hidden group-hover:flex">
+                <button>
+                  <PencilIcon className="w-5 mr-1" />
+                </button>
+                <button
+                  onClick={() => {
+                    handleDelete(review.id);
+                  }}
+                >
+                  <TrashIcon className="w-5 " />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -74,9 +75,16 @@ export default function Review() {
 
 export function AddReview() {
   const [isAddReview, setIsAddReview] = useState(false);
+
+  function handleAddReview() {
+    setIsAddReview(true);
+  }
   return (
     <>
-      <button>Add Review</button>
+      {isAddReview && <div>the form</div>}
+      <Button className="bg-violet-600" onClick={handleAddReview}>
+        {isAddReview ? "Submit" : "Add Review"}
+      </Button>
     </>
   );
 }

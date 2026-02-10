@@ -5,12 +5,12 @@ import DiscountTag from "./discount-tag";
 import { Button } from "../button";
 import PriceTag from "./price-tag";
 import Review from "./product-details/review";
+import { AddReview } from "./product-details/review";
 
 export default function ProductDetails() {
   const products = {
     name: "Christmas",
     imagePath: "/products/christmas/c10.jpeg",
-    address: "London",
     description:
       "Uniquely crafted christmas items for a beautiful season. Bring the spirit of christmas to your home.",
     id: "1",
@@ -29,7 +29,7 @@ export default function ProductDetails() {
 
   return (
     <>
-      <div className="mt-5 flex justify-start h-[360px] bg-gray-100 shadow-md shadow-gray-400 rounded-lg overflow-auto m-3 p-1 ">
+      <div className="mt-5 flex justify-start h-[360px] bg-gray-100 shadow-md shadow-gray-400 rounded-lg m-3 p-1 ">
         <div className="rounded-lg w-96 overflow-hidden h-full relative mr-8 ">
           <Image
             src={`${products.imagePath}`}
@@ -43,12 +43,10 @@ export default function ProductDetails() {
           <h2
             className={`${inter.className} text-xl font-bold`}
           >{`${products.name}`}</h2>
-          <p
-            className={`${inter.className} text-sm text-gray-700`}
-          >{`${products.address}`}</p>
-          <p
-            className={`${inter.className} text-xs text-gray-600 pt-3`}
-          >{`${products.description}`}</p>
+          <p className={`${inter.className} mt-3 text-xs text-gray-600 pt-3`}>
+            {" "}
+            <strong>Description: </strong> {`${products.description}`}
+          </p>
           {/* <div className="absolute top-0 ml-2 mt-2">
             <DiscountTag discount={30} />
           </div> */}
@@ -77,12 +75,18 @@ export default function ProductDetails() {
             <Button children={"Buy Now"} className={"bg-violet-600"} />
           </div>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="flex justify-start">
-            <div>
-              <Review />
-            </div>
-          </div>
+      </div>
+      <div className="bg-gray-100 mx-3 my-5 pt-1  shadow-md shadow-gray-400 rounded-lg ">
+        <h2
+          className={`${lusitana.className} text-violet-700 text-lg font-bold px-4`}
+        >
+          Product Reviews()
+        </h2>
+        <div>
+          <Review />
+        </div>
+        <div>
+          <AddReview />
         </div>
       </div>
     </>

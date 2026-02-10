@@ -7,15 +7,19 @@ export const metadata: Metadata = {
   title: "Products",
 };
 
-export default function Page({ params }: { params: { productId: string } }) {
-  const id = params.productId;
-
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ productId: string }>;
+}) {
+  const { productId } = await params;
+  console.log(productId);
   return (
     <>
       <div className="w-full bg-gray-100 p-2 rounded">
         <div className="flex w-full items-center justify-between">
           <h1 className={`${lusitana.className} text-2xl text-sky-800`}>
-            Products {id}
+            Products {productId}
           </h1>
         </div>
         {/* <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
