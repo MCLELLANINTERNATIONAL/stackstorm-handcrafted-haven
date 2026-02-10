@@ -16,6 +16,49 @@ export type Customer = {
   image_url: string;
 };
 
+// Product types
+export type ProductField = {
+  id: string;
+  product_name: string;
+};
+
+export type ProductsTableType = {
+  id: string;
+  product_name: string;
+  category: string;
+  price: number;
+  email: string;
+  contact: string | null;
+  description: string | null;
+  image_url: string | null;
+  created_at: string; // if your DB returns string here
+};
+
+// Used for edit forms / fetchProductById
+export type ProductForm = {
+  id: string;
+  product_name: string;
+  category: string;
+  price: number;
+  email: string;
+  contact: string | null;
+  description: string | null;
+  image_url: string | null;
+  created_at: Date | string; // if you display/format it like sellers
+};
+
+// Used for createProduct action (no id, no created_at)
+export type CreateProductInput = {
+  product_name: string;
+  category: string;
+  price: number;
+  email: string;
+  contact?: string | null;
+  description: string;
+  image_url?: string | null;
+};
+
+
 // Seller types
 export type SellerField = {
   id: string;
