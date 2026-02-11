@@ -80,7 +80,7 @@ async function seedProducts() {
     CREATE TABLE IF NOT EXISTS products (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
 
-      -- ✅ products belong to a seller (seller_id is a reference, not “manual id”)
+      -- products belong to a seller (seller_id is a reference, not “manual id”)
       seller_id UUID REFERENCES sellers(id) ON DELETE CASCADE,
 
       product_name TEXT NOT NULL,

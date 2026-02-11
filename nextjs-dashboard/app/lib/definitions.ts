@@ -88,6 +88,21 @@ export type CreateSellerInput = {
 };
 
 // =======================
+// Seller Reviews
+// =======================
+
+export type SellerReview = {
+  id: string;
+  seller_id: string;
+  rating: number;
+  comment: string | null;
+  product_name: string | null;
+  customer_name: string | null;
+  created_at: string;
+};
+
+
+// =======================
 // Products
 // =======================
 export type ProductField = {
@@ -131,6 +146,25 @@ export type CreateProductInput = {
   contact?: string | null;
   description: string;
   image_url?: string | null;
+};
+
+// =======================
+// Product Reviews
+// =======================
+
+export type ProductReview = {
+  id: string;
+  product_id: string;
+  rating: number;
+  comment: string;
+  customer_name: string | null;
+  created_at: string;
+};
+
+export type CreateProductReviewInput = {
+  product_id: string;
+  rating: number;
+  comment: string;
 };
 
 // =======================
@@ -178,3 +212,4 @@ export type Revenue = {
   month: string;
   revenue: number;
 };
+
