@@ -146,3 +146,32 @@ export async function fetchProductById(id: string) {
     throw new Error('Failed to fetch product.');
   }
 }
+
+export async function fetchProductsByCategory(category: string) {
+  const cat = String(category ?? '').trim();
+  if (!cat) return [];
+
+  try {
+    const products = await sql<ProductsTableType[]>`
+      SELECT
+        id,
+        seller_id,
+        product_name,
+        category,
+        price,
+        email,
+        contact,
+        description,
+        image_url,
+        created_at
+      FROM products
+      WHERE category = ${cat}
+      ORDER BY created_at DESC;
+    `;
+    return products;
+  } catch (error) {
+    console.error('Database Error (fetchProductsByCategory):', error);
+    throw new Error('Failed to fetch products by category.');
+  }
+}
+
