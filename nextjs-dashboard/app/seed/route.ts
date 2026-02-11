@@ -87,12 +87,43 @@ async function seedSellers() {
       email TEXT NOT NULL UNIQUE,
       contact_no TEXT,
       created_at TIMESTAMP DEFAULT NOW(),
-      story TEXT
+      story TEXT,
       image_url TEXT
     );
   `;
 }
 
+/**
+ * products table
+ * Matches app code: product_name, category, price, email, contact, description, image_url, created_at
+ * Also includes seller_id UUID FK so products belong to sellers.
+ */
+async function seedProducts() {
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS products (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+
+      product_name VARCHAR(255) NOT NULL,
+      category TEXT NOT NULL,
+
+      -- use numeric for money
+      price NUMERIC(10,2) NOT NULL CHECK (price > 0),
+
+      email TEXT NOT NULL,
+      contact TEXT,
+
+      description TEXT,
+      image_url TEXT,
+
+      created_at TIMESTAMP DEFAULT NOW(),
+
+      -- link product to seller (UUID)
+      seller_id UUID REFERENCES sellers(id) ON DELETE CASCADE
+    );
+  `;
+}
 
 async function seedSellerReviews() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -135,6 +166,7 @@ export async function GET() {
       seedUsers(),
       seedCustomers(),
       seedSellers(),
+      seedProducts(),   
       seedSellerReviews(),
       seedInvoices(),
       seedRevenue(),
