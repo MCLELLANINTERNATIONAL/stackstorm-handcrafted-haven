@@ -1,4 +1,3 @@
-// app/lib/product-data.ts
 import postgres from 'postgres';
 import type { ProductForm, ProductsTableType } from './definitions';
 
@@ -6,11 +5,42 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const ITEMS_PER_PAGE = 6;
 
+/** ✅ NEW: fetch products for one seller */
+export async function fetchProductsBySellerId(sellerId: string) {
+  if (!sellerId) {
+    throw new Error('fetchProductsBySellerId: sellerId is required.');
+  }
+
+  try {
+    const products = await sql<ProductsTableType[]>`
+      SELECT
+        id,
+        seller_id,
+        product_name,
+        category,
+        price,
+        email,
+        contact,
+        description,
+        image_url,
+        created_at
+      FROM products
+      WHERE seller_id = ${sellerId}::uuid
+      ORDER BY created_at DESC;
+    `;
+    return products;
+  } catch (error) {
+    console.error('Database Error (fetchProductsBySellerId):', error);
+    throw new Error('Failed to fetch products for this seller.');
+  }
+}
+
 export async function fetchProducts() {
   try {
     const products = await sql<ProductsTableType[]>`
       SELECT
         id,
+        seller_id,
         product_name,
         category,
         price,
@@ -36,6 +66,7 @@ export async function fetchFilteredProducts(query: string, currentPage: number) 
     const products = await sql<ProductsTableType[]>`
       SELECT
         id,
+        seller_id,
         product_name,
         category,
         price,
@@ -95,6 +126,7 @@ export async function fetchProductById(id: string) {
     const data = await sql<ProductForm[]>`
       SELECT
         id,
+        seller_id,
         product_name,
         category,
         price,
@@ -114,4 +146,3 @@ export async function fetchProductById(id: string) {
     throw new Error('Failed to fetch product.');
   }
 }
-
