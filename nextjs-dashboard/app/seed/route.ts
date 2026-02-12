@@ -20,7 +20,7 @@ async function seedUsers() {
     );
   `;
 
-  // ✅ DB generates id (we do NOT insert id)
+  // DB generates id (we do NOT insert id)
   await Promise.all(
     users.map(async (user) => {
       const hashedPassword = await bcrypt.hash(user.password, 10);
@@ -36,7 +36,7 @@ async function seedUsers() {
 async function seedCustomers() {
   await ensureUuid();
 
-  // ✅ Make email unique so we can safely re-run seed
+  // Make email unique so we can safely re-run seed
   await sql`
     CREATE TABLE IF NOT EXISTS customers (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -46,7 +46,7 @@ async function seedCustomers() {
     );
   `;
 
-  // ✅ DB generates id (we do NOT insert id)
+  // DB generates id (we do NOT insert id)
   await Promise.all(
     customers.map((customer) => sql`
       INSERT INTO customers (name, email, image_url)
@@ -156,7 +156,7 @@ export async function GET() {
       seedProducts(),
       seedSellerReviews(),
       seedProductReviews(),
-      // ✅ invoices intentionally not seeded (placeholder requires manual customer_id)
+      // invoices intentionally not seeded (placeholder requires manual customer_id)
       seedRevenue(),
     ]);
 
