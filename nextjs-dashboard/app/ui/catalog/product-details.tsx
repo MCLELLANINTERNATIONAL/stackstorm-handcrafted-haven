@@ -6,6 +6,7 @@ import { Button } from "../button";
 import PriceTag from "./price-tag";
 import Review from "./product-details/review";
 import { AddReview } from "./product-details/add-review";
+import { Rating } from "./product-details/rating";
 
 export default function ProductDetails() {
   const products = {
@@ -70,6 +71,14 @@ export default function ProductDetails() {
               <p>{`${artist.email}`} </p>
             </div>
           </div>
+
+          <div className="my-4 ">
+            <p className={`${inter.className} text-sm text-gray-700`}>
+              Rate the piece:
+            </p>
+            <Rating />
+          </div>
+
           <div className="flex justify-between flex-row w-40 mt-10">
             <PriceTag price={87} />
             <Button children={"Buy Now"} className={"bg-violet-600"} />
