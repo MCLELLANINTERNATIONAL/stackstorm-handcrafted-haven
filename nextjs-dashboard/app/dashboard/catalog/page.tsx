@@ -14,7 +14,7 @@ export default function Page() {
       <div className="w-full bg-gray-100 p-2 rounded">
         <div className="flex w-full items-center justify-between">
           <h1 className={`${lusitana.className} text-2xl text-sky-800`}>
-            Categories
+            Catalog Categories Directory
           </h1>
         </div>
         {/* <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">

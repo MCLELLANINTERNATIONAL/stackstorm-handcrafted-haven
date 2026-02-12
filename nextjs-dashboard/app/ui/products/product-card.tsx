@@ -19,8 +19,6 @@ export default function ProductCard({
   return (
     <Link href={href} className="block">
       <div className="w-60 overflow-hidden rounded-lg bg-gray-100 p-2 shadow-md shadow-gray-400 transition hover:shadow-lg hover:scale-[1.02]">
-        
-        {/* Image */}
         <div className="relative h-44 w-full overflow-hidden rounded-lg bg-white flex items-center justify-center">
           <Image
             src={product.image_url || '/products/placeholder.jpg'}
@@ -31,7 +29,6 @@ export default function ProductCard({
           />
         </div>
 
-        {/* Content */}
         <div className="p-2">
           <h2
             className={`${inter.className} text-sm font-semibold leading-snug text-gray-900 break-words line-clamp-2`}
@@ -40,9 +37,7 @@ export default function ProductCard({
             {product.product_name}
           </h2>
 
-          <p className="mt-1 text-xs text-gray-600 capitalize">
-            {product.category}
-          </p>
+          <p className="mt-1 text-xs text-gray-600 capitalize">{product.category}</p>
 
           <div className="mt-3 flex items-center justify-between">
             <p className="text-sm font-bold text-black">
@@ -58,4 +53,3 @@ export default function ProductCard({
     </Link>
   );
 }
-
