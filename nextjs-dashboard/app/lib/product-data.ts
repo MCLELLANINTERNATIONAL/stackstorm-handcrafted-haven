@@ -1,5 +1,6 @@
 import postgres from 'postgres';
 import type { ProductForm, ProductsTableType } from './definitions';
+import type { CategorySlug } from './categories';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -147,8 +148,8 @@ export async function fetchProductById(id: string) {
   }
 }
 
-export async function fetchProductsByCategory(category: string) {
-  const cat = String(category ?? '').trim();
+export async function fetchProductsByCategory(category: CategorySlug) {
+  const cat = String(category ?? '').trim().toLowerCase() as CategorySlug;
   if (!cat) return [];
 
   try {
@@ -165,7 +166,7 @@ export async function fetchProductsByCategory(category: string) {
         image_url,
         created_at
       FROM products
-      WHERE category = ${cat}
+      WHERE category = ${cat}::product_category
       ORDER BY created_at DESC;
     `;
     return products;
