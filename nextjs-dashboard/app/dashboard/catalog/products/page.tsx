@@ -1,4 +1,3 @@
-// app/dashboard/catalog/products/page.tsx
 import { lusitana } from '@/app/ui/fonts';
 import Link from 'next/link';
 import ProductCard from '@/app/ui/products/product-card';
