@@ -1,3 +1,5 @@
+// app/lib/categories.ts
+
 export type CategorySlug =
   | 'wood'
   | 'home'
@@ -8,17 +10,44 @@ export type CategorySlug =
 export type Category = {
   slug: CategorySlug;
   label: string;
-  imagePath?: string;
+  imagePath: string;
+  description: string;
 };
 
 export const CATEGORIES: readonly Category[] = [
-  { slug: 'wood', label: 'Wood', imagePath: '/categories/wood.jpg' },
-  { slug: 'home', label: 'Home', imagePath: '/categories/home.jpg' },
-  { slug: 'art', label: 'Art', imagePath: '/categories/art.jpg' },
-  { slug: 'christmas', label: 'Christmas', imagePath: '/categories/christmas.jpg' },
+  {
+    slug: 'christmas',
+    label: 'Christmas',
+    imagePath: '/products/christmas/c15.png',
+    description:
+      'Uniquely crafted Christmas items for the festive season.',
+  },
   {
     slug: 'crochet-knitted',
     label: 'Crochet & Knitted',
-    imagePath: '/categories/crochet-knitted.jpg',
+    imagePath: '/products/crochet_knitted/ck2.png',
+    description:
+      'Beautiful crochet and knitted items for you, family, and friends.',
+  },
+  {
+    slug: 'home',
+    label: 'Home',
+    imagePath: '/products/home/ls11.png',
+    description: 'Handmade home pieces to warm your space.',
+  },
+  {
+    slug: 'art',
+    label: 'Art',
+    imagePath: '/products/arts/a1.png',
+    description:
+      'Inspired art celebrating the beauty of creation.',
+  },
+  {
+    slug: 'wood',
+    label: 'Wood',
+    imagePath: '/products/wood/w4.png',
+    description:
+      'Handcrafted wood pieces for home and office.',
   },
 ] as const;
+

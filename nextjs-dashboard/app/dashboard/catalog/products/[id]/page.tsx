@@ -7,8 +7,8 @@ import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
 import { fetchProductById } from '@/app/lib/product-data';
 import {
-  fetchProductReviewsByProductId,
   fetchProductAverageRating,
+  fetchProductReviewsByProductId,
 } from '@/app/lib/product-review-data';
 import ProductReviewForm from '@/app/ui/products/product-review-form';
 import { formatDateToLocal } from '@/app/lib/utils';
@@ -21,33 +21,30 @@ function stars(rating: number) {
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function ProductDetailPage({
-  params,
-  searchParams,
-}: {
+type PageProps = {
+  // ✅ Fixes “params is a Promise” error in your Next.js setup
   params: Promise<{ id: string }>;
   searchParams?: { from?: string; category?: string };
-}) {
+};
+
+export default async function ProductDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
   if (!id) notFound();
 
   const product = await fetchProductById(id);
   if (!product) notFound();
 
-  // If user came from a category page, keep that for breadcrumbs/back button
+  // ✅ Preserve “back to the same category page” behavior
   const fromCategory = searchParams?.from === 'category';
   const categoryFromQuery = searchParams?.category?.trim();
   const category = categoryFromQuery || product.category;
 
-  // Back button destination:
-  // - If user came from category -> back to that category page
-  // - Otherwise -> back to categories page
   const backHref =
     fromCategory && category
       ? `/dashboard/catalog/categories/${encodeURIComponent(category)}`
       : '/dashboard/catalog/categories';
 
-  // Auth check for review form visibility
+  // ✅ Only logged in users can see the form
   const session = await auth();
   const canReview = Boolean(session?.user);
 
@@ -61,6 +58,18 @@ export default async function ProductDetailPage({
       {/* Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link href="/dashboard" className="hover:underline">
+              Dashboard
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
+          <li>
+            <Link href="/dashboard/catalog" className="hover:underline">
+              Catalog
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
           <li>
             <Link href="/dashboard/catalog/categories" className="hover:underline">
               Categories
@@ -79,7 +88,9 @@ export default async function ProductDetailPage({
           ) : null}
 
           <li className="text-gray-400">/</li>
-          <li className="font-semibold text-gray-900">{product.product_name}</li>
+          <li className="font-semibold text-gray-900 line-clamp-1">
+            {product.product_name}
+          </li>
         </ol>
       </nav>
 
@@ -89,8 +100,8 @@ export default async function ProductDetailPage({
 
         <Link
           href={backHref}
-          className="rounded-md border border-green-600 bg-green-600 px-3 py-2 text-sm font-bold
-                     text-white transition-colors hover:border-green-700 hover:bg-green-700"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white
+                     transition-colors hover:bg-green-600 hover:cursor-pointer"
         >
           Back to Categories
         </Link>
@@ -152,9 +163,7 @@ export default async function ProductDetailPage({
 
           <div className="rounded-full bg-yellow-200 px-4 py-2 text-sm font-bold text-black">
             Average Rating:{' '}
-            <span className="font-semibold">
-              {avg === null ? '—' : avg.toFixed(1)}
-            </span>
+            <span className="font-semibold">{avg === null ? '—' : avg.toFixed(1)}</span>
           </div>
         </div>
 
@@ -173,9 +182,7 @@ export default async function ProductDetailPage({
 
                 <div className="text-sm font-bold">{stars(r.rating)}</div>
 
-                <p className="mt-2 whitespace-pre-line text-sm text-gray-700">
-                  {r.comment}
-                </p>
+                <p className="mt-2 whitespace-pre-line text-sm text-gray-700">{r.comment}</p>
               </div>
             ))}
           </div>
@@ -200,4 +207,3 @@ export default async function ProductDetailPage({
     </main>
   );
 }
-
