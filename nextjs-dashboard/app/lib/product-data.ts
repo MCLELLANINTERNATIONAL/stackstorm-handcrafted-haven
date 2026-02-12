@@ -5,7 +5,7 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const ITEMS_PER_PAGE = 6;
 
-/** ✅ NEW: fetch products for one seller */
+/** fetch products for one seller */
 export async function fetchProductsBySellerId(sellerId: string) {
   if (!sellerId) {
     throw new Error('fetchProductsBySellerId: sellerId is required.');

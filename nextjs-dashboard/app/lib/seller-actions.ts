@@ -109,7 +109,7 @@ export async function updateSeller(
     email: formData.get('email')?.toString(),
     contact: formData.get('contact')?.toString(),
     story: formData.get('story')?.toString(),
-    imageUrl: formData.get('imageUrl')?.toString(), // ✅ transform handles empty -> null
+    imageUrl: formData.get('imageUrl')?.toString(), // transform handles empty -> null
   });
 
   if (!validatedFields.success) {

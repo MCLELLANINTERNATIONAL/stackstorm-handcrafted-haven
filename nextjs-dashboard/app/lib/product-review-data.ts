@@ -6,9 +6,9 @@ export type ProductReviewRow = {
   id: string;
   product_id: string;
   rating: number;
-  comment: string; // ✅ NOT NULL in DB
+  comment: string; // NOT NULL in DB
   customer_name: string | null;
-  created_at: string | Date;
+  created_at: string; 
 };
 
 export async function fetchProductReviewsByProductId(productId: string) {
