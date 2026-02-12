@@ -1,4 +1,3 @@
-// app/dashboard/catalog/categories/[category]/page.tsx
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
@@ -9,20 +8,18 @@ import type { CategorySlug } from '@/app/lib/categories';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { category: CategorySlug };
-}): Promise<Metadata> {
-  return { title: `Products • ${params.category}` };
+type PageProps = {
+  params: Promise<{ category: CategorySlug }>;
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { category } = await params;
+  return { title: `Products • ${category}` };
 }
 
-export default async function CategoryPage({
-  params,
-}: {
-  params: { category: CategorySlug };
-}) {
-  const { category } = params;
+export default async function CategoryPage({ params }: PageProps) {
+  const { category } = await params;
+
   const products = await fetchProductsByCategory(category);
 
   return (
@@ -61,4 +58,3 @@ export default async function CategoryPage({
     </div>
   );
 }
-
