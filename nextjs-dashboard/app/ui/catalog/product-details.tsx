@@ -5,7 +5,7 @@ import DiscountTag from "./discount-tag";
 import { Button } from "../button";
 import PriceTag from "./price-tag";
 import Review from "./product-details/review";
-import { AddReview } from "./product-details/review";
+import { AddReview } from "./product-details/add-review";
 
 export default function ProductDetails() {
   const products = {
@@ -86,7 +86,7 @@ export default function ProductDetails() {
           <Review />
         </div>
         <div>
-          <AddReview />
+          <AddReview pData={products.id} />
         </div>
       </div>
     </>

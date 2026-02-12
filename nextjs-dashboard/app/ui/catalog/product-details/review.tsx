@@ -12,6 +12,14 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 
+// The imports from the review file of seller
+import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { StarIcon } from "@heroicons/react/24/solid";
+import clsx from "clsx";
+
+// import { createSellerReview, type ReviewState } from "@/app/lib/review-actions";
+
 export default function Review() {
   const [reviews, setReviews] = useState([
     {
@@ -71,31 +79,4 @@ export default function Review() {
       </div>
     </>
   );
-}
-
-export function AddReview() {
-  const [isAddReview, setIsAddReview] = useState(false);
-
-  function handleAddReview() {
-    setIsAddReview(true);
-  }
-  return (
-    <>
-      {isAddReview && <div>the form</div>}
-      <Button className="bg-violet-600" onClick={handleAddReview}>
-        {isAddReview ? "Submit" : "Add Review"}
-      </Button>
-    </>
-  );
-}
-
-{
-  /* <h2
-            className={`${lusitana.className} text-gray-800 text-sm text-left`}
-          >{`${review.name}`}</h2>
-          <p
-            className={`${inter.className} text-gray-600 text-xs text-left pt-1`}
-          >
-            {`${review.message}`}
-          </p> */
 }

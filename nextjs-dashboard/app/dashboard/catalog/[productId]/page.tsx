@@ -2,6 +2,7 @@ import { lusitana } from "@/app/ui/fonts";
 import { Suspense } from "react";
 import ProductsCard from "@/app/ui/catalog/products-card";
 import type { Metadata } from "next";
+import ProductsFilters from "@/app/ui/catalog/product-filter";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -21,6 +22,9 @@ export default async function Page({
           <h1 className={`${lusitana.className} text-2xl text-sky-800`}>
             Products {productId}
           </h1>
+        </div>
+        <div>
+          <ProductsFilters />
         </div>
         {/* <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
           <Search placeholder="Search products..." />
