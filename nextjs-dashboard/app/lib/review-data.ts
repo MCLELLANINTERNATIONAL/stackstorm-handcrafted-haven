@@ -1,4 +1,3 @@
-// app/lib/review-data.ts
 import postgres from 'postgres';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
@@ -15,7 +14,7 @@ export type SellerReviewRow = {
   seller_id: string; // FK -> sellers.id (DB-generated UUID)
   rating: number;
   comment: string | null;
-  created_at: string; // typically returned as string
+  created_at: string;
   product_name: string | null;
   customer_name: string | null;
 };
@@ -25,7 +24,7 @@ export type SellerReviewWithSellerName = SellerReviewRow & {
 };
 
 /**
- * Call this ONLY from seed/migrations (not during normal page requests).
+ * Call ONLY from seed/migrations (not during normal page requests).
  */
 export async function ensureSellerReviewsTable() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -97,7 +96,7 @@ export async function fetchSellerAverageRating(sellerId: string) {
 }
 
 /**
- * Optional helper if you want counts.
+ counts.
  */
 export async function fetchSellerReviewCount(sellerId: string) {
   if (!sellerId) return 0;

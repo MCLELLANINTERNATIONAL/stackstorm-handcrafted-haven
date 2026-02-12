@@ -210,7 +210,6 @@ export default function ProductForm() {
           </div>
         </div>
 
-        {/* Optional message */}
         {state.message ? (
           <p className="mt-2 text-sm text-red-500">{state.message}</p>
         ) : null}

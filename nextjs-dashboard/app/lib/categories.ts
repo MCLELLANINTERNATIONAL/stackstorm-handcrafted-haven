@@ -1,5 +1,3 @@
-// app/lib/categories.ts
-
 export type CategorySlug =
   | 'wood'
   | 'home'

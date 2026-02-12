@@ -59,8 +59,7 @@ export async function createSellerReview(
     console.error('DB ERROR createSellerReview:', error);
     return { errors: {}, message: `Database Error: ${dbErrorMessage(error)}` };
   }
-
-  // Update whatever page shows reviews (adjust path to your real page)
+  
   revalidatePath('/dashboard/sellers');
   return { errors: {}, message: '' };
 }

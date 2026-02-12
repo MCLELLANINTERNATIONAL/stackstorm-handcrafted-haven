@@ -1,4 +1,3 @@
-// app/lib/seller-data.ts
 import postgres from 'postgres';
 import { SellerForm, SellersTableType } from './definitions';
 
