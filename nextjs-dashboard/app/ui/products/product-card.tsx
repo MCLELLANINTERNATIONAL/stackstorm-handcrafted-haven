@@ -11,10 +11,10 @@ export default function ProductCard({
   categoryFrom?: string;
 }) {
   const href = categoryFrom
-    ? `/dashboard/catalog/products/${product.id}?from=category&category=${encodeURIComponent(
+    ? `/catalog/products/${product.id}?from=category&category=${encodeURIComponent(
         categoryFrom,
       )}`
-    : `/dashboard/catalog/products/${product.id}`;
+    : `/catalog/products/${product.id}`;
 
   return (
     <Link href={href} className="block">

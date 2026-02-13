@@ -44,7 +44,7 @@ export default function CategoryCard() {
       {categories.map((category) => (
         <Link
           key={category.slug}
-          href={`/dashboard/catalog/categories/${category.slug}`}
+          href={`/catalog/categories/${category.slug}`}
           className="hover:cursor-pointer"
         >
           <div className="mt-5 h-72 w-60 overflow-auto rounded-lg bg-gray-100 p-2 shadow-md shadow-gray-400 transition-all hover:scale-95">

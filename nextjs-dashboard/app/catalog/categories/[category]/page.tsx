@@ -42,15 +42,15 @@ export default async function CategoryPage({
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
-            <Link href="/dashboard" className="hover:underline">
-              Dashboard
+            <Link href="/app" className="hover:underline">
+              Categories
             </Link>
           </li>
 
           <li className="text-gray-400">/</li>
 
           <li>
-            <Link href="/dasboard/catalog" className="hover:underline">
+            <Link href="/catalog" className="hover:underline">
               Catalog
             </Link>
           </li>
@@ -58,7 +58,7 @@ export default async function CategoryPage({
           <li className="text-gray-400">/</li>
 
           <li>
-            <Link href="/dashboard/catalog/categories" className="hover:underline">
+            <Link href="/catalog/categories" className="hover:underline">
               Categories
             </Link>
           </li>
