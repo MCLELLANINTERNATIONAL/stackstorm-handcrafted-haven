@@ -6,7 +6,9 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const ITEMS_PER_PAGE = 6;
 
-/** fetch products for one seller */
+/* =====================================================
+   FETCH PRODUCTS FOR ONE SELLER
+===================================================== */
 export async function fetchProductsBySellerId(sellerId: string) {
   if (!sellerId) {
     throw new Error('fetchProductsBySellerId: sellerId is required.');
@@ -36,6 +38,9 @@ export async function fetchProductsBySellerId(sellerId: string) {
   }
 }
 
+/* =====================================================
+   FETCH ALL PRODUCTS (CATALOG)
+===================================================== */
 export async function fetchProducts() {
   try {
     const products = await sql<ProductsTableType[]>`
@@ -51,7 +56,7 @@ export async function fetchProducts() {
         image_url,
         created_at
       FROM products
-      ORDER BY created_at DESC
+      ORDER BY created_at DESC;
     `;
     return products;
   } catch (error) {
@@ -60,7 +65,13 @@ export async function fetchProducts() {
   }
 }
 
-export async function fetchFilteredProducts(query: string, currentPage: number) {
+/* =====================================================
+   FILTERED PRODUCTS (SEARCH)
+===================================================== */
+export async function fetchFilteredProducts(
+  query: string,
+  currentPage: number,
+) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
@@ -86,7 +97,7 @@ export async function fetchFilteredProducts(query: string, currentPage: number) 
         price::text ILIKE ${`%${query}%`} OR
         created_at::text ILIKE ${`%${query}%`}
       ORDER BY created_at DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
     `;
     return products;
   } catch (error) {
@@ -95,6 +106,9 @@ export async function fetchFilteredProducts(query: string, currentPage: number) 
   }
 }
 
+/* =====================================================
+   TOTAL PRODUCT PAGES (SEARCH PAGINATION)
+===================================================== */
 export async function fetchProductsPages(query: string) {
   try {
     const data = await sql`
@@ -107,10 +121,13 @@ export async function fetchProductsPages(query: string) {
         contact ILIKE ${`%${query}%`} OR
         description ILIKE ${`%${query}%`} OR
         price::text ILIKE ${`%${query}%`} OR
-        created_at::text ILIKE ${`%${query}%`}
+        created_at::text ILIKE ${`%${query}%`};
     `;
 
-    const totalPages = Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(
+      Number(data[0].count ?? 0) / ITEMS_PER_PAGE,
+    );
+
     return totalPages;
   } catch (error) {
     console.error('Database Error (fetchProductsPages):', error);
@@ -118,9 +135,14 @@ export async function fetchProductsPages(query: string) {
   }
 }
 
+/* =====================================================
+   FETCH PRODUCT BY ID (DETAIL PAGE)
+===================================================== */
 export async function fetchProductById(id: string) {
   if (!id) {
-    throw new Error('fetchProductById: id is required (received undefined/empty).');
+    throw new Error(
+      'fetchProductById: id is required (received undefined/empty).',
+    );
   }
 
   try {
@@ -148,8 +170,16 @@ export async function fetchProductById(id: string) {
   }
 }
 
-export async function fetchProductsByCategory(category: CategorySlug) {
-  const cat = String(category ?? '').trim().toLowerCase() as CategorySlug;
+/* =====================================================
+   FETCH PRODUCTS BY CATEGORY (CATALOG CATEGORY PAGE)
+===================================================== */
+export async function fetchProductsByCategory(
+  category: CategorySlug,
+) {
+  const cat = String(category ?? '')
+    .trim()
+    .toLowerCase() as CategorySlug;
+
   if (!cat) return [];
 
   try {
@@ -171,8 +201,55 @@ export async function fetchProductsByCategory(category: CategorySlug) {
     `;
     return products;
   } catch (error) {
-    console.error('Database Error (fetchProductsByCategory):', error);
+    console.error(
+      'Database Error (fetchProductsByCategory):',
+      error,
+    );
     throw new Error('Failed to fetch products by category.');
+  }
+}
+
+/* =====================================================
+  FETCH SELLER PRODUCTS BY SELLER + CATEGORY
+  (USED ONLY FOR SELLER PROFILE PRODUCTS PAGE)
+===================================================== */
+export async function fetchProductsBySellerIdAndCategory(
+  sellerId: string,
+  category: CategorySlug | string,
+) {
+  const cat = String(category ?? '')
+    .trim()
+    .toLowerCase() as CategorySlug;
+
+  if (!sellerId || !cat) return [];
+
+  try {
+    const products = await sql<ProductsTableType[]>`
+      SELECT
+        id,
+        seller_id,
+        product_name,
+        category,
+        price,
+        email,
+        contact,
+        description,
+        image_url,
+        created_at
+      FROM products
+      WHERE seller_id = ${sellerId}::uuid
+        AND category = ${cat}::product_category
+      ORDER BY created_at DESC;
+    `;
+    return products;
+  } catch (error) {
+    console.error(
+      'Database Error (fetchProductsBySellerIdAndCategory):',
+      error,
+    );
+    throw new Error(
+      'Failed to fetch seller products by category.',
+    );
   }
 }
 

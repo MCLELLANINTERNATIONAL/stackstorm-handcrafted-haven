@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useActionState } from 'react';
-import { deleteProduct } from '@/app/lib/product-actions';
+import { deleteProductAsOwner } from '@/app/lib/product-actions';
 
 type DeleteState = {
   message: string;
@@ -13,8 +13,9 @@ export default function DeleteProductForm({ productId }: { productId: string }) 
 
   const action = async (_prevState: DeleteState, _formData: FormData) => {
     try {
-      // Uses ONLY the Postgres-generated products.id
-      await deleteProduct(productId);
+      // Secure owner-verified delete
+      await deleteProductAsOwner(productId);
+
       return { message: '' };
     } catch (err: unknown) {
       const msg =
