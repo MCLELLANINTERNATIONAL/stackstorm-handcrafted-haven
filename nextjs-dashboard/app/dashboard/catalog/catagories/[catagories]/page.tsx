@@ -2,7 +2,7 @@ import { lusitana } from '@/app/ui/fonts';
 import Link from 'next/link';
 import { fetchProductsByCategoryPaginated, fetchCategoryPages } from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
-import Pagination from '@/app/ui/pagination';
+import Pagination from '@/app/ui/category/pagination';
 import type { CategorySlug } from '@/app/lib/categories';
 
 export const dynamic = 'force-dynamic';
