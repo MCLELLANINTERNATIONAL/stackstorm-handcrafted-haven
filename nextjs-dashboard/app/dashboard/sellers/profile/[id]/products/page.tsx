@@ -73,7 +73,8 @@ export default async function SellerProductsPage({
         <div className="flex gap-2">
           <Link
             href={`/dashboard/sellers/profile/${seller.id}`}
-            className="rounded-md bg-gray-200 px-4 py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300"
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white 
+            transition-colors hover:bg-green-600 hover:cursor-pointer"
           >
             Back to seller
           </Link>
