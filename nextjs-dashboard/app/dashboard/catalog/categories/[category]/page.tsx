@@ -1,31 +1,43 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
-import { fetchProductsByCategory } from '@/app/lib/product-data';
+import {
+  fetchProductsByCategoryPaginated,
+  fetchCategoryPages,
+} from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
+import Pagination from '@/app/ui/category/pagination';
 import type { CategorySlug } from '@/app/lib/categories';
-
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 type PageProps = {
   params: Promise<{ category: CategorySlug }>;
+  searchParams?: { page?: string };
 };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { category } = await params;
   return { title: `Products • ${category}` };
 }
 
-export default async function CategoryPage({ params }: PageProps) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { category } = await params;
+  const currentPage = Number(searchParams?.page) || 1;
 
-  const products = await fetchProductsByCategory(category);
+  const [products, totalPages] = await Promise.all([
+    fetchProductsByCategoryPaginated(category, currentPage),
+    fetchCategoryPages(category),
+  ]);
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
-
       {/* 🧭 Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
@@ -46,19 +58,14 @@ export default async function CategoryPage({ params }: PageProps) {
           <li className="text-gray-400">/</li>
 
           <li>
-            <Link
-              href="/dashboard/catalog/categories"
-              className="hover:underline"
-            >
+            <Link href="/dashboard/catalog/categories" className="hover:underline">
               Categories
             </Link>
           </li>
 
           <li className="text-gray-400">/</li>
 
-          <li className="font-semibold text-gray-900 capitalize">
-            {category}
-          </li>
+          <li className="font-semibold text-gray-900 capitalize">{category}</li>
         </ol>
       </nav>
 
@@ -87,9 +94,7 @@ export default async function CategoryPage({ params }: PageProps) {
       {/* Grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
-          <p className="text-sm text-gray-600">
-            No products in this category.
-          </p>
+          <p className="text-sm text-gray-600">No products in this category.</p>
         ) : (
           products.map((product) => (
             <ProductCard
@@ -100,6 +105,14 @@ export default async function CategoryPage({ params }: PageProps) {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 ? (
+        <div className="mt-6 flex justify-center">
+          <Pagination totalPages={totalPages} />
+        </div>
+      ) : null}
     </div>
   );
 }
+

@@ -1,6 +1,10 @@
+import { Suspense } from 'react';
 import { lusitana } from '@/app/ui/fonts';
 import Link from 'next/link';
-import { fetchProductsByCategoryPaginated, fetchCategoryPages } from '@/app/lib/product-data';
+import {
+  fetchProductsByCategoryPaginated,
+  fetchCategoryPages,
+} from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
 import Pagination from '@/app/ui/category/pagination';
 import type { CategorySlug } from '@/app/lib/categories';
@@ -12,10 +16,7 @@ type PageProps = {
   searchParams?: { page?: string };
 };
 
-export default async function CategoryPage({
-  params,
-  searchParams,
-}: PageProps) {
+export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { category } = params;
   const currentPage = Number(searchParams?.page) || 1;
 
@@ -23,7 +24,6 @@ export default async function CategoryPage({
     fetchProductsByCategoryPaginated(category, currentPage),
     fetchCategoryPages(category),
   ]);
-  
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
@@ -43,9 +43,7 @@ export default async function CategoryPage({
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
-          <p className="text-sm text-gray-600">
-            No products in this category.
-          </p>
+          <p className="text-sm text-gray-600">No products in this category.</p>
         ) : (
           products.map((product) => (
             <ProductCard
@@ -57,12 +55,15 @@ export default async function CategoryPage({
         )}
       </div>
 
-      {totalPages > 1 && (
+      {totalPages > 1 ? (
         <div className="mt-6 flex justify-center">
-          <Pagination totalPages={totalPages} />
+          <Suspense fallback={null}>
+            <Pagination totalPages={totalPages} />
+          </Suspense>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
+
 
