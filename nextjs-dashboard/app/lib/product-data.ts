@@ -210,6 +210,66 @@ export async function fetchProductsByCategory(
 }
 
 /* =====================================================
+   FETCH PRODUCTS BY CATEGORY (PAGINATED)
+===================================================== */
+export async function fetchProductsByCategoryPaginated(
+  category: CategorySlug,
+  currentPage: number,
+) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const cat = String(category).trim().toLowerCase() as CategorySlug;
+  if (!cat) return [];
+
+  try {
+    const products = await sql<ProductsTableType[]>`
+      SELECT
+        id,
+        seller_id,
+        product_name,
+        category,
+        price,
+        email,
+        contact,
+        description,
+        image_url,
+        created_at
+      FROM products
+      WHERE category = ${cat}::product_category
+      ORDER BY created_at DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+    `;
+    return products;
+  } catch (error) {
+    console.error('Database Error (fetchProductsByCategoryPaginated):', error);
+    throw new Error('Failed to fetch paginated products by category.');
+  }
+}
+
+/* =====================================================
+   TOTAL CATEGORY PAGES (CATEGORY PAGINATION)
+===================================================== */
+export async function fetchCategoryPages(category: CategorySlug) {
+  const cat = String(category).trim().toLowerCase() as CategorySlug;
+  if (!cat) return 0;
+
+  try {
+    const data = await sql`
+      SELECT COUNT(*)::int AS count
+      FROM products
+      WHERE category = ${cat}::product_category;
+    `;
+
+    const totalPages = Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error (fetchCategoryPages):', error);
+    throw new Error('Failed to fetch category pages.');
+  }
+}
+
+
+/* =====================================================
   FETCH SELLER PRODUCTS BY SELLER + CATEGORY
   (USED ONLY FOR SELLER PROFILE PRODUCTS PAGE)
 ===================================================== */

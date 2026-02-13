@@ -1,18 +1,29 @@
 import { lusitana } from '@/app/ui/fonts';
 import Link from 'next/link';
-import { fetchProductsByCategory } from '@/app/lib/product-data';
+import { fetchProductsByCategoryPaginated, fetchCategoryPages } from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
+import Pagination from '@/app/ui/pagination';
 import type { CategorySlug } from '@/app/lib/categories';
 
 export const dynamic = 'force-dynamic';
 
+type PageProps = {
+  params: { category: CategorySlug };
+  searchParams?: { page?: string };
+};
+
 export default async function CategoryPage({
   params,
-}: {
-  params: { category: CategorySlug };
-}) {
+  searchParams,
+}: PageProps) {
   const { category } = params;
-  const products = await fetchProductsByCategory(category);
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const [products, totalPages] = await Promise.all([
+    fetchProductsByCategoryPaginated(category, currentPage),
+    fetchCategoryPages(category),
+  ]);
+  
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
@@ -23,7 +34,8 @@ export default async function CategoryPage({
 
         <Link
           href="/dashboard/catalog/categories"
-          className="rounded-md bg-gray-200 px-4 py-2 text-sm font-bold"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white
+                     transition-colors hover:bg-green-600 hover:cursor-pointer"
         >
           Back to categories
         </Link>
@@ -44,6 +56,13 @@ export default async function CategoryPage({
           ))
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-center">
+          <Pagination totalPages={totalPages} />
+        </div>
+      )}
     </div>
   );
 }
+
