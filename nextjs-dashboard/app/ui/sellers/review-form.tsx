@@ -89,12 +89,12 @@ export default function ReviewForm({ sellerId }: { sellerId: string }) {
 
       <div>
         <label htmlFor="productName" className="sr-only">
-          Product name
+          Seller or Product name
         </label>
         <input
           id="productName"
           name="productName"
-          placeholder="Product name (optional)"
+          placeholder="Seller or Product name (optional)"
           className="w-full rounded-md border p-2 text-sm"
         />
         {state.errors?.productName?.map((e) => (
@@ -111,7 +111,7 @@ export default function ReviewForm({ sellerId }: { sellerId: string }) {
         <textarea
           id="comment"
           name="comment"
-          placeholder="Write your review about the product..."
+          placeholder="Write your review about the seller..."
           className="w-full rounded-md border p-2 text-sm"
           rows={4}
           required

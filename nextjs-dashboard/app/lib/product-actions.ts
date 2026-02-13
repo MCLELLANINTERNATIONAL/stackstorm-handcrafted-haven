@@ -3,8 +3,13 @@
 import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+
+/* =====================================================
+   TYPES
+===================================================== */
 
 export type ProductErrors = {
   imageUrl?: string[];
@@ -20,6 +25,10 @@ export type ProductState = {
   message: string;
   errors?: ProductErrors;
 };
+
+/* =====================================================
+   VALIDATION
+===================================================== */
 
 function validateProduct(formData: FormData): {
   errors: ProductErrors;
@@ -55,7 +64,10 @@ function validateProduct(formData: FormData): {
   if (!contact) errors.contact = ['Contact number is required.'];
   if (!description) errors.description = ['Description is required.'];
 
-  if (imageUrlRaw && !(imageUrlRaw.startsWith('/') || imageUrlRaw.startsWith('http'))) {
+  if (
+    imageUrlRaw &&
+    !(imageUrlRaw.startsWith('/') || imageUrlRaw.startsWith('http'))
+  ) {
     errors.imageUrl = ['Use a relative path (/) or a full URL (http/https).'];
   }
 
@@ -72,17 +84,20 @@ function validateProduct(formData: FormData): {
       email,
       contact,
       description,
-      imageUrl: imageUrlRaw ? imageUrlRaw : null,
+      imageUrl: imageUrlRaw || null,
     },
   };
 }
+
+/* =====================================================
+   CREATE PRODUCT
+===================================================== */
 
 export async function createProduct(
   prevState: ProductState,
   formData: FormData,
 ): Promise<ProductState> {
   const { errors, data } = validateProduct(formData);
-
   if (!data) return { message: 'Please fix the errors below.', errors };
 
   try {
@@ -108,12 +123,19 @@ export async function createProduct(
     `;
   } catch (error) {
     console.error('Database Error (createProduct):', error);
-    return { message: 'Database error: failed to create product.', errors: {} };
+    return {
+      message: 'Database error: failed to create product.',
+      errors: {},
+    };
   }
 
-  revalidatePath('/dashboard/products');
-  redirect('/dashboard/products');
+  revalidatePath('/dashboard/catalog/products');
+  redirect('/dashboard/catalog/products');
 }
+
+/* =====================================================
+   UPDATE PRODUCT
+===================================================== */
 
 export async function updateProduct(
   id: string,
@@ -140,19 +162,58 @@ export async function updateProduct(
     `;
   } catch (error) {
     console.error('Database Error (updateProduct):', error);
-    return { message: 'Database error: failed to update product.', errors: {} };
+    return {
+      message: 'Database error: failed to update product.',
+      errors: {},
+    };
   }
 
-  revalidatePath('/dashboard/products');
-  redirect('/dashboard/products');
+  revalidatePath('/dashboard/catalog/products');
+  redirect('/dashboard/catalog/products');
 }
 
-export async function deleteProduct(id: string) {
-  if (!id) throw new Error('Missing product id.');
+/* =====================================================
+   DELETE (OWNER-SECURED)
+===================================================== */
 
+export async function deleteProductAsOwner(productId: string) {
+  const session = await auth();
+  const userEmail = session?.user?.email?.toLowerCase();
+
+  if (!userEmail) {
+    throw new Error('You must be logged in.');
+  }
+
+  if (!productId) {
+    throw new Error('Missing product id.');
+  }
+
+  // Verify ownership
+  const rows = await sql<
+    { seller_id: string; seller_email: string }[]
+  >`
+    SELECT p.seller_id, s.email AS seller_email
+    FROM products p
+    JOIN sellers s ON s.id = p.seller_id
+    WHERE p.id = ${productId}::uuid
+    LIMIT 1;
+  `;
+
+  const row = rows[0];
+  if (!row) throw new Error('Product not found.');
+
+  if (row.seller_email.toLowerCase() !== userEmail) {
+    throw new Error('Not authorized to delete this product.');
+  }
+
+  // Delete
   await sql`
     DELETE FROM products
-    WHERE id = ${id}::uuid
+    WHERE id = ${productId}::uuid;
   `;
-}
 
+  // Refresh seller product list
+  revalidatePath(`/dashboard/sellers/profile/${row.seller_id}/products`);
+
+  return { sellerId: row.seller_id };
+}

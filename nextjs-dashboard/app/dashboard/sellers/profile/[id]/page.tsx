@@ -52,20 +52,31 @@ export default async function SellerProfilePage({
           font-bold text-white hover:bg-blue-700 hover:border-green-700 
           transition-colors"
         >
-          Back to directory
+          Back to Directory
         </Link>
       </div>
 
       <section className="mb-10 flex flex-col gap-6 md:flex-row">
-        <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl border bg-gray-100">
-        <Image
-          src={seller.image_url || '/sellers/placeholder-seller.jpg'}
-          alt={`Seller ${seller.seller_name}`}
-          fill
-          className="object-cover"
-          sizes="224px"
-          priority
-        />
+        {/* LEFT COLUMN: image + button under it */}
+        <div className="flex flex-col items-start">
+          <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl border bg-gray-100">
+            <Image
+              src={seller.image_url || '/sellers/placeholder-seller.jpg'}
+              alt={`Seller ${seller.seller_name}`}
+              fill
+              className="object-cover"
+              sizes="224px"
+              priority
+            />
+          </div>
+
+          <Link
+            href={`/dashboard/sellers/profile/${seller.id}/products`}
+            className="mt-4 w-56 rounded-md bg-blue-600 px-4 py-2 text-center text-sm font-bold
+                       text-white transition-colors hover:bg-green-600 hover:cursor-pointer"
+          >
+            Seller&apos;s Products
+          </Link>
         </div>
 
         <div className="flex-1">
@@ -91,16 +102,18 @@ export default async function SellerProfilePage({
           </div>
 
           <div className="mt-4">
-            <h3 className="text-sm font-semibold">Contact</h3>
+            <h3 className="text-sm font-semibold">Contact Us</h3>
             <p className="mt-1 text-sm">{seller.email}</p>
-            {seller.contact_no ? <p className="text-sm">{seller.contact_no}</p> : null}
+            {seller.contact_no ? (
+              <p className="text-sm">{seller.contact_no}</p>
+            ) : null}
           </div>
         </div>
       </section>
 
       <section>
         <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold">Customer Reviews</h2>
+          <h2 className="text-xl font-semibold">Seller Reviews</h2>
           <div className="rounded-full bg-yellow-200 px-4 py-2 text-sm font-bold text-black">
             Average Rating:{' '}
             <span className="font-semibold">
