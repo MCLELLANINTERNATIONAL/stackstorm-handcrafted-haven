@@ -52,7 +52,7 @@ export default async function SellerProfilePage({
           font-bold text-white hover:bg-blue-700 hover:border-green-700 
           transition-colors"
         >
-          Back to directory
+          Back to Directory
         </Link>
       </div>
 
@@ -91,7 +91,7 @@ export default async function SellerProfilePage({
           </div>
 
           <div className="mt-4">
-            <h3 className="text-sm font-semibold">Contact</h3>
+            <h3 className="text-sm font-semibold">Contact Us</h3>
             <p className="mt-1 text-sm">{seller.email}</p>
             {seller.contact_no ? <p className="text-sm">{seller.contact_no}</p> : null}
           </div>
@@ -100,7 +100,7 @@ export default async function SellerProfilePage({
 
       <section>
         <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold">Customer Reviews</h2>
+          <h2 className="text-xl font-semibold">Seller Reviews</h2>
           <div className="rounded-full bg-yellow-200 px-4 py-2 text-sm font-bold text-black">
             Average Rating:{' '}
             <span className="font-semibold">
