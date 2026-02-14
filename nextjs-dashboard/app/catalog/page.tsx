@@ -17,9 +17,9 @@ export default function Page() {
             Catalog Categories Directory
           </h1>
         </div>
-        {/* <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+        <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
           <Search placeholder="Search products..." />
-        </div> */}
+        </div>
         <div className="mt-6 mx-auto flex flex-wrap ml:grid grid-cols-3 gap-4">
           <CategoryCard />
         </div>
