@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 type PageProps = {
-  // ✅ Fixes “params is a Promise” error in your Next.js setup
+  // Fixes “params is a Promise” error in your Next.js setup
   params: Promise<{ id: string }>;
   searchParams?: { from?: string; category?: string };
 };
@@ -34,7 +34,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   const product = await fetchProductById(id);
   if (!product) notFound();
 
-  // ✅ Preserve “back to the same category page” behavior
+  // Preserve “back to the same category page” behavior
   const fromCategory = searchParams?.from === 'category';
   const categoryFromQuery = searchParams?.category?.trim();
   const category = categoryFromQuery || product.category;
@@ -44,7 +44,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
       ? `/dashboard/catalog/categories/${encodeURIComponent(category)}`
       : '/dashboard/catalog/categories';
 
-  // ✅ Only logged in users can see the form
+  // Only logged in users can see the form
   const session = await auth();
   const canReview = Boolean(session?.user);
 
@@ -59,19 +59,19 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
-            <Link href="/dashboard" className="hover:underline">
-              Dashboard
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
-          <li>
-            <Link href="/dashboard/catalog" className="hover:underline">
+            <Link href="/app" className="hover:underline">
               Catalog
             </Link>
           </li>
           <li className="text-gray-400">/</li>
           <li>
-            <Link href="/dashboard/catalog/categories" className="hover:underline">
+            <Link href="/catalog" className="hover:underline">
+              Catalog
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
+          <li>
+            <Link href="/catalog/categories" className="hover:underline">
               Categories
             </Link>
           </li>

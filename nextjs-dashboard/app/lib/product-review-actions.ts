@@ -55,6 +55,6 @@ export async function createProductReview(
     VALUES (${productId}::uuid, ${rating}, ${comment}, ${customerName});
   `;
 
-  revalidatePath('/dashboard/products');
+  revalidatePath('/products');
   return { message: '', errors: {} };
 }

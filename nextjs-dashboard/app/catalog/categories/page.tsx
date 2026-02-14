@@ -26,7 +26,7 @@ export default function Page() {
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.slug}
-            href={`/dashboard/catalog/categories/${cat.slug}`}
+            href={`/catalog/categories/${cat.slug}`}
             className="overflow-hidden rounded-lg border bg-white shadow-sm transition hover:shadow-md"
           >
             {/* Image */}
