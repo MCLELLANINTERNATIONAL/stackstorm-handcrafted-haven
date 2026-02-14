@@ -11,9 +11,11 @@ import Search from '@/app/ui/search';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
 type PageProps = {
-  params: Promise<{ id: string }>;
-  searchParams?: { query?: string };
+  params: Promise<{ id: string }> | { id: string };
+  searchParams: SearchParams;
 };
 
 export default async function SellerProductsPage({ params, searchParams }: PageProps) {
@@ -32,8 +34,15 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
   // ALL products for this seller
   const allProducts = await fetchProductsBySellerId(seller.id);
 
+  // unwrap searchParams (Next 16+)
+  const sp = await searchParams;
+
   // search filter (works with your Search component query param)
-  const q = (searchParams?.query ?? '').trim().toLowerCase();
+  const queryParam = sp?.query;
+  const q = (Array.isArray(queryParam) ? queryParam[0] : queryParam ?? '')
+    .trim()
+    .toLowerCase();
+
   const products =
     q.length === 0
       ? allProducts
@@ -117,7 +126,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
           <p className="text-sm text-gray-600">
-            No products found{q ? ` for “${searchParams?.query}”.` : '.'}
+            No products found{q ? ` for “${q}”.` : '.'}
           </p>
         ) : (
           products.map((p) => (
