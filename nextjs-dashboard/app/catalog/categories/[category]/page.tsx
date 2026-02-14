@@ -12,24 +12,30 @@ import type { CategorySlug } from '@/app/lib/categories';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
 type PageProps = {
-  params: Promise<{ category: CategorySlug }>;
-  searchParams?: { page?: string };
+  params: Promise<{ category: CategorySlug }> | { category: CategorySlug };
+  searchParams: SearchParams;
 };
 
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
+}: {
+  params: Promise<{ category: CategorySlug }> | { category: CategorySlug };
+}): Promise<Metadata> {
   const { category } = await params;
   return { title: `Products • ${category}` };
 }
 
-export default async function CategoryPage({
-  params,
-  searchParams,
-}: PageProps) {
+export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { category } = await params;
-  const currentPage = Number(searchParams?.page) || 1;
+  const sp = await searchParams;
+
+  const pageParam = sp?.page;
+  const currentPage = Number(
+    Array.isArray(pageParam) ? pageParam[0] : pageParam ?? 1,
+  );
 
   const [products, totalPages] = await Promise.all([
     fetchProductsByCategoryPaginated(category, currentPage),
@@ -115,4 +121,5 @@ export default async function CategoryPage({
     </div>
   );
 }
+
 
