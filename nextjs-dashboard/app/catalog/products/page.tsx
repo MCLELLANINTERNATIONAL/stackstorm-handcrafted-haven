@@ -40,7 +40,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
           href={backHref}
           className="inline-block rounded-md bg-gray-200 px-4 py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300"
         >
-          ← Back to Catalog Categories Directory
+          ← Back to Category
         </Link>
       </div>
 
@@ -58,6 +58,3 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     </div>
   );
 }
-
-
-

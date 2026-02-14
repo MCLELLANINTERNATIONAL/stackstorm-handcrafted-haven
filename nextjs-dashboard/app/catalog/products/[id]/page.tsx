@@ -1,5 +1,3 @@
-// app/dashboard/catalog/products/[id]/page.tsx
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -22,29 +20,31 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 type PageProps = {
-  // Fixes “params is a Promise” error in your Next.js setup
   params: Promise<{ id: string }>;
-  searchParams?: { from?: string; category?: string };
+  searchParams: Promise<{ from?: string; category?: string }>;
 };
 
-export default async function ProductDetailPage({ params, searchParams }: PageProps) {
+export default async function ProductDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { id } = await params;
   if (!id) notFound();
 
   const product = await fetchProductById(id);
   if (!product) notFound();
 
-  // Preserve “back to the same category page” behavior
-  const fromCategory = searchParams?.from === 'category';
-  const categoryFromQuery = searchParams?.category?.trim();
-  const category = categoryFromQuery || product.category;
+  // ✅ Properly unwrap searchParams (Next 16)
+  const sp = (await searchParams) ?? {};
+  const category = sp.category?.trim();
+  const from = sp.from?.trim();
 
+  // ✅ PUBLIC catalog route (NO dashboard)
   const backHref =
-    fromCategory && category
-      ? `/dashboard/catalog/categories/${encodeURIComponent(category)}`
-      : '/dashboard/catalog/categories';
+    category && from === 'category'
+      ? `/catalog/categories/${encodeURIComponent(category)}`
+      : '/catalog';
 
-  // Only logged in users can see the form
   const session = await auth();
   const canReview = Boolean(session?.user);
 
@@ -59,24 +59,12 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
-            <Link href="/app" className="hover:underline">
-              Catalog
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
-          <li>
             <Link href="/catalog" className="hover:underline">
               Catalog
             </Link>
           </li>
-          <li className="text-gray-400">/</li>
-          <li>
-            <Link href="/catalog/categories" className="hover:underline">
-              Categories
-            </Link>
-          </li>
 
-          {fromCategory && category ? (
+          {category && (
             <>
               <li className="text-gray-400">/</li>
               <li>
@@ -85,7 +73,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 </Link>
               </li>
             </>
-          ) : null}
+          )}
 
           <li className="text-gray-400">/</li>
           <li className="font-semibold text-gray-900 line-clamp-1">
@@ -107,7 +95,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         </Link>
       </div>
 
-      {/* Product section (profile-style layout) */}
+      {/* Product section */}
       <section className="mb-10 flex flex-col gap-6 md:flex-row">
         <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl border bg-white">
           <Image
@@ -121,21 +109,26 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         </div>
 
         <div className="flex-1">
-          <h2 className="text-3xl font-semibold">{product.product_name}</h2>
+          <h2 className="text-3xl font-semibold">
+            {product.product_name}
+          </h2>
 
           <p className="mt-2 text-sm text-gray-600">
-            Category: <span className="font-semibold">{product.category}</span>
+            Category:{' '}
+            <span className="font-semibold">
+              {product.category}
+            </span>
           </p>
 
           <p className="mt-2 text-lg font-bold text-black">
             £{Number(product.price).toFixed(2)}
           </p>
 
-          {product.created_at ? (
+          {product.created_at && (
             <p className="mt-1 text-sm text-gray-600">
               Listed {formatDateToLocal(String(product.created_at))}
             </p>
-          ) : null}
+          )}
 
           <div className="mt-4">
             <h3 className="text-sm font-semibold">Description</h3>
@@ -144,51 +137,68 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 {product.description}
               </p>
             ) : (
-              <p className="mt-2 text-sm text-gray-500">No description provided.</p>
+              <p className="mt-2 text-sm text-gray-500">
+                No description provided.
+              </p>
             )}
           </div>
 
           <div className="mt-4">
             <h3 className="text-sm font-semibold">Contact</h3>
             <p className="mt-1 text-sm">{product.email}</p>
-            {product.contact ? <p className="text-sm">{product.contact}</p> : null}
+            {product.contact && (
+              <p className="text-sm">{product.contact}</p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Reviews section */}
+      {/* Reviews */}
       <section>
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-xl font-semibold">Customer Reviews</h2>
 
           <div className="rounded-full bg-yellow-200 px-4 py-2 text-sm font-bold text-black">
             Average Rating:{' '}
-            <span className="font-semibold">{avg === null ? '—' : avg.toFixed(1)}</span>
+            <span className="font-semibold">
+              {avg === null ? '—' : avg.toFixed(1)}
+            </span>
           </div>
         </div>
 
         {reviews.length === 0 ? (
-          <p className="text-sm text-gray-500">This product has no reviews yet.</p>
+          <p className="text-sm text-gray-500">
+            This product has no reviews yet.
+          </p>
         ) : (
           <div className="space-y-4">
             {reviews.map((r) => (
-              <div key={r.id} className="rounded-lg border bg-white p-4">
+              <div
+                key={r.id}
+                className="rounded-lg border bg-white p-4"
+              >
                 <div className="mb-1 flex items-center justify-between">
-                  <p className="text-sm font-medium">{r.customer_name ?? 'Customer'}</p>
+                  <p className="text-sm font-medium">
+                    {r.customer_name ?? 'Customer'}
+                  </p>
                   <p className="text-xs text-gray-500">
                     {formatDateToLocal(String(r.created_at))}
                   </p>
                 </div>
 
-                <div className="text-sm font-bold">{stars(r.rating)}</div>
+                <div className="text-sm font-bold">
+                  {stars(r.rating)}
+                </div>
 
-                <p className="mt-2 whitespace-pre-line text-sm text-gray-700">{r.comment}</p>
+                <p className="mt-2 whitespace-pre-line text-sm text-gray-700">
+                  {r.comment}
+                </p>
               </div>
             ))}
           </div>
         )}
 
-        {/* Review form: visible only if logged in */}
+        {/* Review form */}
         <div className="mt-6">
           {canReview ? (
             <ProductReviewForm productId={product.id} />
