@@ -91,7 +91,7 @@ export default async function ProductDetailPage({
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white
                      transition-colors hover:bg-green-600 hover:cursor-pointer"
         >
-          Back to Categories
+          Back to Category
         </Link>
       </div>
 
