@@ -59,19 +59,19 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
-            <Link href="/app" className="hover:underline">
+            <Link href="/dashboard" className="hover:underline">
+              Dashboard
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
+          <li>
+            <Link href="/dashboard/catalog" className="hover:underline">
               Catalog
             </Link>
           </li>
           <li className="text-gray-400">/</li>
           <li>
-            <Link href="/catalog" className="hover:underline">
-              Catalog
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
-          <li>
-            <Link href="/catalog/categories" className="hover:underline">
+            <Link href="/dashboard/catalog/categories" className="hover:underline">
               Categories
             </Link>
           </li>

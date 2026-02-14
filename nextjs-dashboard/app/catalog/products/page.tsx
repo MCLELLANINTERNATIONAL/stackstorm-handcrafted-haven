@@ -18,10 +18,10 @@ export default async function Page() {
         </h1>
 
         <Link
-          href="/catalog/categories"
+          href="/catalog"
           className="rounded-md bg-gray-200 px-4 py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300"
         >
-          Back to categories
+          Back to Catalog Categories Directory
         </Link>
       </div>
 
