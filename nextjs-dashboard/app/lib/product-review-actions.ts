@@ -1,8 +1,6 @@
-// app/lib/product-review-actions.ts
 'use server';
 
 import postgres from 'postgres';
-import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
@@ -10,6 +8,7 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export type ReviewErrors = {
   rating?: string[];
   comment?: string[];
+  customer_name?: string[];
 };
 
 export type ReviewState = {
@@ -21,15 +20,10 @@ export async function createProductReview(
   prevState: ReviewState,
   formData: FormData,
 ): Promise<ReviewState> {
-  const session = await auth();
-
-  if (!session?.user) {
-    return { message: 'You must be logged in to leave a review.', errors: {} };
-  }
-
   const productId = String(formData.get('productId') ?? '').trim();
   const ratingRaw = String(formData.get('rating') ?? '').trim();
   const comment = String(formData.get('comment') ?? '').trim();
+  const customerNameRaw = String(formData.get('customerName') ?? '').trim();
 
   const errors: ReviewErrors = {};
   const rating = Number(ratingRaw);
@@ -44,17 +38,22 @@ export async function createProductReview(
     errors.comment = ['Comment is required.'];
   }
 
+  // Optional name (but nice to have)
+  const customerName = customerNameRaw || 'Customer';
+
   if (Object.keys(errors).length > 0) {
     return { message: 'Please fix the errors below.', errors };
   }
-
-  const customerName = session.user.name ?? 'Customer';
 
   await sql`
     INSERT INTO product_reviews (product_id, rating, comment, customer_name)
     VALUES (${productId}::uuid, ${rating}, ${comment}, ${customerName});
   `;
 
-  revalidatePath('/products');
-  return { message: '', errors: {} };
+  // Revalidate the product + catalog pages (adjust to your routes)
+  revalidatePath('/catalog');
+  revalidatePath('/catalog/products');
+  revalidatePath(`/catalog/products/${productId}`);
+
+  return { message: 'Thanks! Your review was submitted.', errors: {} };
 }
