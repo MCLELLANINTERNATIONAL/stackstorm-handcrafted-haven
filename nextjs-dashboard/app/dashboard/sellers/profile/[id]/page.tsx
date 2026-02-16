@@ -11,11 +11,21 @@ import {
 } from '@/app/lib/review-data';
 
 function stars(rating: number) {
-  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  const safe = Math.max(0, Math.min(5, Math.round(rating)));
+  return '★'.repeat(safe) + '☆'.repeat(5 - safe);
 }
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+type SellerReviewRow = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  customer_name: string | null;
+  product_name: string | null;
+  created_at: string | Date;
+};
 
 export default async function SellerProfilePage({
   params,
@@ -23,22 +33,25 @@ export default async function SellerProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
   if (!id) notFound();
 
   const seller = await fetchSellerById(id);
   if (!seller) notFound();
 
-  const [reviews, avg] = await Promise.all([
+  const [reviewsRaw, avg] = await Promise.all([
     fetchSellerReviewsBySellerId(seller.id),
     fetchSellerAverageRating(seller.id),
   ]);
+
+  const reviews = reviewsRaw as SellerReviewRow[];
 
   const createdAt =
     seller.created_at
       ? typeof seller.created_at === 'string'
         ? seller.created_at
-        : seller.created_at.toISOString()
+        : seller.created_at instanceof Date
+          ? seller.created_at.toISOString()
+          : String(seller.created_at)
       : null;
 
   return (
@@ -49,8 +62,7 @@ export default async function SellerProfilePage({
         <Link
           href="/dashboard/sellers"
           className="rounded-md border border-green-600 bg-green-600 px-3 py-2 text-sm 
-          font-bold text-white hover:bg-blue-700 hover:border-green-700 
-          transition-colors"
+          font-bold text-white transition-colors hover:bg-blue-700 hover:border-green-700"
         >
           Back to Directory
         </Link>
@@ -126,27 +138,36 @@ export default async function SellerProfilePage({
           <p className="text-sm text-gray-500">This seller has no reviews yet.</p>
         ) : (
           <div className="space-y-4">
-            {reviews.map((r) => (
-              <div key={r.id} className="rounded-lg border bg-white p-4">
-                <div className="mb-1 flex items-center justify-between">
-                  <p className="text-sm font-medium">
-                    {r.customer_name ?? 'Customer'}
-                    {r.product_name ? (
-                      <span className="text-gray-500"> • {r.product_name}</span>
-                    ) : null}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatDateToLocal(r.created_at)}
-                  </p>
+            {reviews.map((r) => {
+              const reviewDate =
+                typeof r.created_at === 'string'
+                  ? r.created_at
+                  : r.created_at instanceof Date
+                    ? r.created_at.toISOString()
+                    : String(r.created_at);
+
+              return (
+                <div key={r.id} className="rounded-lg border bg-white p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="text-sm font-medium">
+                      {r.customer_name ?? 'Customer'}
+                      {r.product_name ? (
+                        <span className="text-gray-500"> • {r.product_name}</span>
+                      ) : null}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formatDateToLocal(reviewDate)}
+                    </p>
+                  </div>
+
+                  <div className="text-sm font-bold">{stars(r.rating)}</div>
+
+                  {r.comment ? (
+                    <p className="mt-2 text-sm text-gray-700">{r.comment}</p>
+                  ) : null}
                 </div>
-
-                <div className="text-sm font-bold">{stars(r.rating)}</div>
-
-                {r.comment ? (
-                  <p className="mt-2 text-sm text-gray-700">{r.comment}</p>
-                ) : null}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -155,3 +176,4 @@ export default async function SellerProfilePage({
     </main>
   );
 }
+

@@ -28,7 +28,9 @@ export async function createProductReview(
   const errors: ReviewErrors = {};
   const rating = Number(ratingRaw);
 
-  if (!productId) return { message: 'Missing product id.', errors: {} };
+  if (!productId) {
+    return { message: 'Missing product id.', errors: {} };
+  }
 
   if (!ratingRaw || Number.isNaN(rating) || rating < 1 || rating > 5) {
     errors.rating = ['Please choose a rating between 1 and 5.'];
@@ -38,22 +40,37 @@ export async function createProductReview(
     errors.comment = ['Comment is required.'];
   }
 
-  // Optional name (but nice to have)
   const customerName = customerNameRaw || 'Customer';
 
   if (Object.keys(errors).length > 0) {
     return { message: 'Please fix the errors below.', errors };
   }
 
-  await sql`
-    INSERT INTO product_reviews (product_id, rating, comment, customer_name)
-    VALUES (${productId}::uuid, ${rating}, ${comment}, ${customerName});
-  `;
+  try {
+    await sql`
+      INSERT INTO product_reviews (
+        product_id,
+        rating,
+        comment,
+        customer_name
+      )
+      VALUES (
+        ${productId}::uuid,
+        ${rating},
+        ${comment},
+        ${customerName}
+      );
+    `;
+  } catch (error) {
+    console.error('Database Error (createProductReview):', error);
+    return { message: 'Failed to submit review.', errors: {} };
+  }
 
-  // Revalidate the product + catalog pages (adjust to your routes)
-  revalidatePath('/catalog');
-  revalidatePath('/catalog/products');
+  /* Revalidate ONLY the product detail page */
   revalidatePath(`/catalog/products/${productId}`);
 
-  return { message: 'Thanks! Your review was submitted.', errors: {} };
+  return {
+    message: 'Thanks! Your review was submitted.',
+    errors: {},
+  };
 }

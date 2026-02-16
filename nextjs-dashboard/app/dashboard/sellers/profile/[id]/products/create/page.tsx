@@ -1,25 +1,67 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import ProductForm from '@/app/ui/products/create-form';
+import { requireSellerOwner } from '@/app/lib/seller-auth';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export default function CreateProductPage() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id: sellerId } = await params;
+
+  if (!sellerId) notFound();
+
+  await requireSellerOwner(sellerId);
+
+  const backHref = `/dashboard/sellers/profile/${sellerId}/products`;
+
   return (
     <main className="mx-auto max-w-4xl p-6">
+      {/* Breadcrumbs */}
+      <nav className="mb-4 text-sm text-gray-600">
+        <ol className="flex flex-wrap items-center gap-2">
+          <li>
+            <Link href="/dashboard/sellers" className="hover:underline">
+              Sellers
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
+          <li>
+            <Link
+              href={`/dashboard/sellers/profile/${sellerId}`}
+              className="hover:underline"
+            >
+              Profile
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
+          <li>
+            <Link href={backHref} className="hover:underline">
+              Products
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
+          <li className="font-semibold text-gray-900">Create</li>
+        </ol>
+      </nav>
+
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Create Product</h1>
 
         <Link
-          href="/dashboard/products"
-          className="rounded-md border border-green-600 bg-green-600 px-3 py-2 text-sm font-bold text-white
-                     transition-colors hover:bg-green-700 hover:border-green-700"
+          href={backHref}
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-green-600"
         >
           Back to products
         </Link>
       </div>
 
       <section className="rounded-xl border bg-white p-6">
-        <ProductForm />
+        <ProductForm sellerId={sellerId} backHref={backHref} />
       </section>
     </main>
   );

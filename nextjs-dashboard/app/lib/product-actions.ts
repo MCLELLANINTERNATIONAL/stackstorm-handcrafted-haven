@@ -2,7 +2,6 @@
 
 import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
@@ -30,18 +29,7 @@ export type ProductState = {
    VALIDATION
 ===================================================== */
 
-function validateProduct(formData: FormData): {
-  errors: ProductErrors;
-  data: {
-    productName: string;
-    category: string;
-    price: number;
-    email: string;
-    contact: string;
-    description: string;
-    imageUrl: string | null;
-  } | null;
-} {
+function validateProduct(formData: FormData) {
   const errors: ProductErrors = {};
 
   const productName = String(formData.get('productName') ?? '').trim();
@@ -90,19 +78,44 @@ function validateProduct(formData: FormData): {
 }
 
 /* =====================================================
-   CREATE PRODUCT
+   CREATE PRODUCT (OWNER ONLY)
 ===================================================== */
 
-export async function createProduct(
-  prevState: ProductState,
+export async function createProductAsOwner(
+  sellerId: string,
+  _prevState: ProductState,
   formData: FormData,
 ): Promise<ProductState> {
+  const session = await auth();
+  const userEmail = session?.user?.email?.toLowerCase();
+
+  if (!userEmail) {
+    return { message: 'You must be logged in.', errors: {} };
+  }
+
+  if (!sellerId) {
+    return { message: 'Missing seller id.', errors: {} };
+  }
+
+  // Verify ownership
+  const seller = await sql<{ email: string }[]>`
+    SELECT email
+    FROM sellers
+    WHERE id = ${sellerId}::uuid
+    LIMIT 1;
+  `;
+
+  if (!seller[0] || seller[0].email.toLowerCase() !== userEmail) {
+    return { message: 'Not authorized.', errors: {} };
+  }
+
   const { errors, data } = validateProduct(formData);
   if (!data) return { message: 'Please fix the errors below.', errors };
 
   try {
     await sql`
       INSERT INTO products (
+        seller_id,
         product_name,
         category,
         price,
@@ -112,8 +125,9 @@ export async function createProduct(
         image_url
       )
       VALUES (
+        ${sellerId}::uuid,
         ${data.productName},
-        ${data.category},
+        ${data.category}::product_category,
         ${data.price},
         ${data.email},
         ${data.contact},
@@ -122,27 +136,60 @@ export async function createProduct(
       );
     `;
   } catch (error) {
-    console.error('Database Error (createProduct):', error);
-    return {
-      message: 'Database error: failed to create product.',
-      errors: {},
-    };
+    console.error('CREATE ERROR:', error);
+    return { message: 'Database error: failed to create product.', errors: {} };
   }
 
-  revalidatePath('/dashboard/catalog/products');
-  redirect('/dashboard/catalog/products');
+  // Revalidate
+  revalidatePath(`/dashboard/sellers/profile/${sellerId}/products`);
+  revalidatePath('/catalog');
+  revalidatePath(`/catalog/categories/${data.category}`);
+
+  return { message: '' };
 }
 
 /* =====================================================
-   UPDATE PRODUCT
+   UPDATE PRODUCT (OWNER ONLY)
 ===================================================== */
 
-export async function updateProduct(
-  id: string,
-  prevState: ProductState,
+export async function updateProductAsOwner(
+  productId: string,
+  sellerId: string,
+  _prevState: ProductState,
   formData: FormData,
 ): Promise<ProductState> {
-  if (!id) return { message: 'Missing product id.', errors: {} };
+  const session = await auth();
+  const userEmail = session?.user?.email?.toLowerCase();
+
+  if (!userEmail) {
+    return { message: 'You must be logged in.', errors: {} };
+  }
+
+  if (!productId || !sellerId) {
+    return { message: 'Missing product or seller id.', errors: {} };
+  }
+
+  const existing = await sql<
+    { seller_id: string; seller_email: string; category: string }[]
+  >`
+    SELECT p.seller_id, p.category, s.email AS seller_email
+    FROM products p
+    JOIN sellers s ON s.id = p.seller_id
+    WHERE p.id = ${productId}::uuid
+    LIMIT 1;
+  `;
+
+  const row = existing[0];
+  if (!row) return { message: 'Product not found.', errors: {} };
+
+  if (
+    row.seller_id !== sellerId ||
+    row.seller_email.toLowerCase() !== userEmail
+  ) {
+    return { message: 'Not authorized.', errors: {} };
+  }
+
+  const oldCategory = row.category;
 
   const { errors, data } = validateProduct(formData);
   if (!data) return { message: 'Please fix the errors below.', errors };
@@ -152,68 +199,74 @@ export async function updateProduct(
       UPDATE products
       SET
         product_name = ${data.productName},
-        category = ${data.category},
+        category = ${data.category}::product_category,
         price = ${data.price},
         email = ${data.email},
         contact = ${data.contact},
         description = ${data.description},
         image_url = ${data.imageUrl}
-      WHERE id = ${id}::uuid;
+      WHERE id = ${productId}::uuid
+        AND seller_id = ${sellerId}::uuid;
     `;
   } catch (error) {
-    console.error('Database Error (updateProduct):', error);
-    return {
-      message: 'Database error: failed to update product.',
-      errors: {},
-    };
+    console.error('UPDATE ERROR:', error);
+    return { message: 'Database error: failed to update product.', errors: {} };
   }
 
-  revalidatePath('/dashboard/catalog/products');
-  redirect('/dashboard/catalog/products');
+  revalidatePath(`/dashboard/sellers/profile/${sellerId}/products`);
+  revalidatePath('/catalog');
+
+  // If category changed, revalidate both
+  revalidatePath(`/catalog/categories/${oldCategory}`);
+  revalidatePath(`/catalog/categories/${data.category}`);
+
+  return { message: '' };
 }
 
 /* =====================================================
-   DELETE (OWNER-SECURED)
+   DELETE PRODUCT (OWNER ONLY)
 ===================================================== */
 
-export async function deleteProductAsOwner(productId: string) {
+export async function deleteProductAsOwner(
+  productId: string,
+  sellerId: string,
+) {
   const session = await auth();
   const userEmail = session?.user?.email?.toLowerCase();
 
-  if (!userEmail) {
-    throw new Error('You must be logged in.');
-  }
+  if (!userEmail) throw new Error('You must be logged in.');
+  if (!productId || !sellerId)
+    throw new Error('Missing product or seller id.');
 
-  if (!productId) {
-    throw new Error('Missing product id.');
-  }
-
-  // Verify ownership
-  const rows = await sql<
-    { seller_id: string; seller_email: string }[]
+  const existing = await sql<
+    { seller_id: string; seller_email: string; category: string }[]
   >`
-    SELECT p.seller_id, s.email AS seller_email
+    SELECT p.seller_id, p.category, s.email AS seller_email
     FROM products p
     JOIN sellers s ON s.id = p.seller_id
     WHERE p.id = ${productId}::uuid
     LIMIT 1;
   `;
 
-  const row = rows[0];
+  const row = existing[0];
   if (!row) throw new Error('Product not found.');
 
-  if (row.seller_email.toLowerCase() !== userEmail) {
-    throw new Error('Not authorized to delete this product.');
+  if (
+    row.seller_id !== sellerId ||
+    row.seller_email.toLowerCase() !== userEmail
+  ) {
+    throw new Error('Not authorized.');
   }
 
-  // Delete
   await sql`
     DELETE FROM products
-    WHERE id = ${productId}::uuid;
+    WHERE id = ${productId}::uuid
+      AND seller_id = ${sellerId}::uuid;
   `;
 
-  // Refresh seller product list
-  revalidatePath(`/dashboard/sellers/profile/${row.seller_id}/products`);
+  revalidatePath(`/dashboard/sellers/profile/${sellerId}/products`);
+  revalidatePath('/catalog');
+  revalidatePath(`/catalog/categories/${row.category}`);
 
-  return { sellerId: row.seller_id };
+  return { sellerId };
 }

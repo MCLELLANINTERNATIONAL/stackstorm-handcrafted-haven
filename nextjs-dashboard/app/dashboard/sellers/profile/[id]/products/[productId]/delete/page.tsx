@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import DeleteProductForm from '@/app/ui/products/delete-form';
-import { fetchProductById } from '@/app/lib/product-data';
+import { fetchProductByIdForSeller } from '@/app/lib/product-data';
+import { requireSellerOwner } from '@/app/lib/seller-auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,28 +11,24 @@ export const revalidate = 0;
 export default async function Page({
   params,
 }: {
-  params: { id: string; productId: string };
+  params: Promise<{ id: string; productId: string }>;
 }) {
-  const { id: sellerId, productId } = params;
+  const { id: sellerId, productId } = await params;
 
   if (!sellerId || !productId) notFound();
 
-  const product = await fetchProductById(productId);
+  await requireSellerOwner(sellerId);
+
+  const product = await fetchProductByIdForSeller(productId, sellerId);
   if (!product) notFound();
 
   const backHref = `/dashboard/sellers/profile/${sellerId}/products`;
 
   return (
-    <div className="w-full rounded bg-gray-100 p-4">
+    <main className="w-full rounded bg-gray-100 p-4">
       {/* Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
-          <li>
-            <Link href="/dashboard" className="hover:underline">
-              Dashboard
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
           <li>
             <Link href="/dashboard/sellers" className="hover:underline">
               Sellers
@@ -65,10 +62,13 @@ export default async function Page({
         </p>
 
         <div className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
-          <DeleteProductForm productId={productId} backHref={backHref} />
+          <DeleteProductForm
+            sellerId={sellerId}
+            productId={productId}
+            backHref={backHref}
+          />
         </div>
       </div>
-    </div>
+    </main>
   );
 }
-

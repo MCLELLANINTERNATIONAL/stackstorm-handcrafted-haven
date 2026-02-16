@@ -5,21 +5,17 @@ import Search from '@/app/ui/search';
 import Pagination from '@/app/ui/sellers/pagination';
 import SellersTable from '@/app/ui/sellers/table';
 
-import {
-  fetchFilteredSellers,
-  fetchSellersPages,
-} from '@/app/lib/seller-data';
+import { fetchFilteredSellers, fetchSellersPages } from '@/app/lib/seller-data';
 
 export const metadata: Metadata = { title: 'Sellers' };
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function Page(props: {
-  searchParams?: Promise<{ query?: string; page?: string }>;
+  searchParams?: { query?: string; page?: string };
 }) {
-  const searchParams = await props.searchParams;
-  const query = searchParams?.query ?? '';
-  const currentPage = Number(searchParams?.page ?? '1');
+  const query = props.searchParams?.query ?? '';
+  const currentPage = Number(props.searchParams?.page ?? '1');
 
   const [sellers, totalPages] = await Promise.all([
     fetchFilteredSellers(query, currentPage),
@@ -36,13 +32,12 @@ export default async function Page(props: {
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Search placeholder="Search seller..." />
 
-        {/* Create button */}
         <Link
           href="/dashboard/sellers/profile/create"
           className="inline-flex h-10 cursor-pointer items-center rounded-lg bg-green-600 px-4 text-sm font-bold text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
-      >
-        Create Seller Profile +
-      </Link>
+        >
+          Create Seller Profile +
+        </Link>
       </div>
 
       <div className="mt-6">

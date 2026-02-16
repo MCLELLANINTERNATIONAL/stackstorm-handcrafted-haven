@@ -1,34 +1,31 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useActionState } from 'react';
-import { deleteProductAsOwner } from '@/app/lib/product-actions';
+import Link from "next/link";
+import { useActionState } from "react";
+import { deleteProductAsOwner } from "@/app/lib/product-actions";
 
 type DeleteState = { message: string };
 
 export default function DeleteProductForm({
+  sellerId,
   productId,
   backHref,
 }: {
+  sellerId: string;
   productId: string;
   backHref: string;
 }) {
-  const initialState: DeleteState = { message: '' };
+  const initialState: DeleteState = { message: "" };
 
-  const action = async (_prevState: DeleteState, formData: FormData) => {
+  const action = async (_prev: DeleteState, formData: FormData) => {
     try {
-      const confirm = String(formData.get('confirm') ?? '').trim();
-      if (confirm !== 'DELETE') {
-        return { message: 'Type DELETE exactly to confirm.' };
-      }
+      const confirm = String(formData.get("confirm") ?? "").trim();
+      if (confirm !== "DELETE") return { message: "Type DELETE exactly to confirm." };
 
-      await deleteProductAsOwner(productId);
-
-      return { message: '' };
+      await deleteProductAsOwner(productId, sellerId);
+      return { message: "" };
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : 'Failed to delete product.';
-      return { message: msg };
+      return { message: err instanceof Error ? err.message : "Failed to delete product." };
     }
   };
 
@@ -36,13 +33,11 @@ export default function DeleteProductForm({
 
   return (
     <form action={formAction} className="space-y-4">
+      {/* unchanged UI */}
       <p className="text-sm text-gray-700">
         Type <span className="font-semibold">DELETE</span> below to confirm.
       </p>
 
-      <label htmlFor="confirm" className="sr-only">
-        Confirmation text
-      </label>
       <input
         id="confirm"
         name="confirm"
@@ -56,7 +51,7 @@ export default function DeleteProductForm({
       <div className="flex items-center gap-3">
         <Link
           href={backHref}
-          className="rounded-md border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:cursor-pointer"
+          className="rounded-md border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           Cancel
         </Link>
@@ -64,9 +59,9 @@ export default function DeleteProductForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 hover:cursor-pointer disabled:opacity-60"
+          className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
         >
-          {isPending ? 'Deleting…' : 'Permanently Delete Product'}
+          {isPending ? "Deleting…" : "Permanently Delete Product"}
         </button>
       </div>
 
@@ -76,4 +71,3 @@ export default function DeleteProductForm({
     </form>
   );
 }
-
