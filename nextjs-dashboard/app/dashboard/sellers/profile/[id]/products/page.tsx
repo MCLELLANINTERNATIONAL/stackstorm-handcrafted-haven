@@ -7,6 +7,7 @@ import { fetchSellerById } from '@/app/lib/seller-data';
 import { fetchProductsBySellerId } from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
 import Search from '@/app/ui/search';
+import { isAdminEmail } from '@/app/lib/auth-constants';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -26,9 +27,11 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
 
   // Owner check
   const session = await auth();
+  const userEmail = session?.user?.email?.toLowerCase() ?? '';
+  const isAdmin = isAdminEmail(userEmail);
   const isOwner =
-    Boolean(session?.user?.email) &&
-    session!.user!.email!.toLowerCase() === seller.email.toLowerCase();
+    userEmail.length > 0 && userEmail === seller.email.toLowerCase();
+  const canManage = isOwner || isAdmin;
 
   // ALL products for this seller
   const allProducts = await fetchProductsBySellerId(seller.id, seller.email);
@@ -95,7 +98,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
             Back to seller
           </Link>
 
-          {isOwner ? (
+          {canManage ? (
             <Link
               href={`/dashboard/sellers/profile/${seller.id}/products/create`}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white
@@ -125,7 +128,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
               <ProductCard product={p} />
 
               {/* Owner-only edit/delete icons under the card */}
-              {isOwner ? (
+              {canManage ? (
                 <div className="mt-2 flex justify-end gap-2">
                   <Link
                     href={`/dashboard/sellers/profile/${seller.id}/products/${p.id}/edit`}

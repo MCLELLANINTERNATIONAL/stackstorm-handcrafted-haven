@@ -29,7 +29,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { category } = await params;
   const isAll = category === 'all' || category === 'all-products';
-  return { title: isAll ? 'Products ‚Ä¢ All Products' : `Products ‚Ä¢ ${category}` };
+  return { title: isAll ? 'Products • All Products' : `Products • ${category}` };
 }
 
 export default async function CategoryPage({
@@ -71,7 +71,7 @@ export default async function CategoryPage({
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
-      {/* üß≠ Breadcrumbs */}
+      {/* 🧭 Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
@@ -132,7 +132,7 @@ export default async function CategoryPage({
         </Link>
       </div>
 
-      {/* Filters */}
+      {/* ✅ Filters */}
       <div className="mt-4">
         <ProductFilters
           showCategoryFilter={isAll}

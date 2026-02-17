@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import DeleteProductForm from '@/app/ui/products/delete-form';
 import { fetchProductById } from '@/app/lib/product-data';
+import { fetchSellerById } from '@/app/lib/seller-data';
+import { getSellerAccess } from '@/app/lib/authz';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,14 +12,23 @@ export const revalidate = 0;
 export default async function Page({
   params,
 }: {
-  params: { id: string; productId: string };
+  params: Promise<{ id: string; productId: string }>;
 }) {
-  const { id: sellerId, productId } = params;
+  const { id: sellerId, productId } = await params;
 
   if (!sellerId || !productId) notFound();
 
   const product = await fetchProductById(productId);
   if (!product) notFound();
+  if (product.seller_id && product.seller_id !== sellerId) notFound();
+
+  const seller = await fetchSellerById(sellerId);
+  if (!seller) notFound();
+
+  const access = await getSellerAccess(seller.id);
+  if (!access.canManage) {
+    redirect(`/dashboard/sellers/profile/${sellerId}/products`);
+  }
 
   const backHref = `/dashboard/sellers/profile/${sellerId}/products`;
 
@@ -71,4 +82,5 @@ export default async function Page({
     </div>
   );
 }
+
 

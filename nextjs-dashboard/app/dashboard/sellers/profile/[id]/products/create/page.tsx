@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import ProductForm from '@/app/ui/products/create-form';
 import { fetchSellerById } from '@/app/lib/seller-data';
+import { getSellerAccess } from '@/app/lib/authz';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,11 @@ export default async function CreateProductPage({
 
   const seller = await fetchSellerById(id);
   if (!seller) notFound();
+
+  const access = await getSellerAccess(seller.id);
+  if (!access.canManage) {
+    redirect(`/dashboard/sellers/profile/${seller.id}/products`);
+  }
 
   return (
     <main className="mx-auto max-w-4xl p-6">

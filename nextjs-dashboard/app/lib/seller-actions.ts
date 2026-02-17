@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import postgres from 'postgres';
+import bcrypt from 'bcrypt';
+import { ADMIN_EMAIL, normalizeEmail } from '@/app/lib/auth-constants';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -48,8 +50,51 @@ export type State = {
     contact?: string[];
     story?: string[];
     imageUrl?: string[];
+    password?: string[];
+    confirmPassword?: string[];
   };
 };
+
+function validatePasswordPair(
+  passwordRaw: FormDataEntryValue | null,
+  confirmRaw: FormDataEntryValue | null,
+  required: boolean,
+) {
+  const password = String(passwordRaw ?? '').trim();
+  const confirmPassword = String(confirmRaw ?? '').trim();
+  const errors: State['errors'] = {};
+
+  if (required && !password) {
+    errors.password = ['Password is required.'];
+  }
+
+  const hasAny = password.length > 0 || confirmPassword.length > 0;
+  if (!required && !hasAny) {
+    return { errors, password: null as string | null };
+  }
+
+  if (!password) {
+    errors.password = ['Password is required.'];
+  }
+
+  if (!confirmPassword) {
+    errors.confirmPassword = ['Please confirm the password.'];
+  }
+
+  if (password && password.length < 8) {
+    errors.password = ['Password must be at least 8 characters.'];
+  }
+
+  if (password && confirmPassword && password !== confirmPassword) {
+    errors.confirmPassword = ['Passwords do not match.'];
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { errors, password: null as string | null };
+  }
+
+  return { errors: {}, password };
+}
 
 function dbErrorMessage(error: unknown): string {
   const e = error as any;
@@ -81,14 +126,54 @@ export async function createSeller(
     };
   }
 
+  const passwordValidation = validatePasswordPair(
+    formData.get('password'),
+    formData.get('confirmPassword'),
+    true,
+  );
+  if (Object.keys(passwordValidation.errors).length > 0 || !passwordValidation.password) {
+    return {
+      errors: passwordValidation.errors,
+      message: 'Password validation failed.',
+    };
+  }
+
   const { sellerName, category, email, contact, story, imageUrl } =
     validatedFields.data as FormFields;
+  const normalizedEmail = normalizeEmail(email);
+
+  if (normalizedEmail === ADMIN_EMAIL) {
+    return {
+      errors: { email: ['Seller email cannot use the admin email address.'] },
+      message: 'Invalid seller email.',
+    };
+  }
 
   try {
-    await sql`
-      INSERT INTO sellers (seller_name, category, email, contact_no, story, image_url)
-      VALUES (${sellerName}, ${category}, ${email}, ${contact}, ${story}, ${imageUrl})
-    `;
+    const hashedPassword = await bcrypt.hash(passwordValidation.password, 10);
+
+    await sql.begin(async (tx) => {
+      await tx`
+        INSERT INTO sellers (seller_name, category, email, contact_no, story, image_url)
+        VALUES (
+          ${sellerName},
+          ${category},
+          ${normalizedEmail},
+          ${contact},
+          ${story},
+          ${imageUrl}
+        )
+      `;
+
+      await tx`
+        INSERT INTO users (name, email, password)
+        VALUES (${sellerName}, ${normalizedEmail}, ${hashedPassword})
+        ON CONFLICT (email) DO UPDATE
+        SET
+          name = EXCLUDED.name,
+          password = EXCLUDED.password
+      `;
+    });
   } catch (error: unknown) {
     console.error('DB ERROR createSeller:', error);
     return { errors: {}, message: `Database Error: ${dbErrorMessage(error)}` };
@@ -119,22 +204,107 @@ export async function updateSeller(
     };
   }
 
+  const passwordValidation = validatePasswordPair(
+    formData.get('password'),
+    formData.get('confirmPassword'),
+    false,
+  );
+  if (Object.keys(passwordValidation.errors).length > 0) {
+    return {
+      errors: passwordValidation.errors,
+      message: 'Password validation failed.',
+    };
+  }
+
   const { sellerName, category, email, contact, story, imageUrl } =
     validatedFields.data as FormFields;
+  const newEmail = normalizeEmail(email);
+
+  if (newEmail === ADMIN_EMAIL) {
+    return {
+      errors: { email: ['Seller email cannot use the admin email address.'] },
+      message: 'Invalid seller email.',
+    };
+  }
 
   try {
-    await sql`
-      UPDATE sellers
-      SET seller_name = ${sellerName},
-          category = ${category},
-          email = ${email},
-          contact_no = ${contact},
-          story = ${story},
-          image_url = ${imageUrl}
-      WHERE id = ${id}::uuid
-    `;
+    const passwordHash = passwordValidation.password
+      ? await bcrypt.hash(passwordValidation.password, 10)
+      : null;
+
+    await sql.begin(async (tx) => {
+      const currentRows = await tx<{ email: string }[]>`
+        SELECT email
+        FROM sellers
+        WHERE id = ${id}::uuid
+        LIMIT 1
+      `;
+
+      const currentSeller = currentRows[0];
+      if (!currentSeller) {
+        throw new Error('Seller not found.');
+      }
+
+      const oldEmail = normalizeEmail(currentSeller.email);
+
+      await tx`
+        UPDATE sellers
+        SET seller_name = ${sellerName},
+            category = ${category},
+            email = ${newEmail},
+            contact_no = ${contact},
+            story = ${story},
+            image_url = ${imageUrl}
+        WHERE id = ${id}::uuid
+      `;
+
+      const movedUser = passwordHash
+        ? await tx<{ id: string }[]>`
+            UPDATE users
+            SET email = ${newEmail},
+                name = ${sellerName},
+                password = ${passwordHash}
+            WHERE LOWER(email) = ${oldEmail}
+            RETURNING id
+          `
+        : await tx<{ id: string }[]>`
+            UPDATE users
+            SET email = ${newEmail},
+                name = ${sellerName}
+            WHERE LOWER(email) = ${oldEmail}
+            RETURNING id
+          `;
+
+      if (movedUser.length > 0) return;
+
+      if (!passwordHash) {
+        throw new Error(
+          'No linked login user found for this seller. Provide a new password to link one.',
+        );
+      }
+
+      await tx`
+        INSERT INTO users (name, email, password)
+        VALUES (${sellerName}, ${newEmail}, ${passwordHash})
+        ON CONFLICT (email) DO UPDATE
+        SET
+          name = EXCLUDED.name,
+          password = EXCLUDED.password
+      `;
+    });
   } catch (error: unknown) {
     console.error('DB ERROR updateSeller:', error);
+    if (
+      error instanceof Error &&
+      error.message.includes('No linked login user found for this seller')
+    ) {
+      return {
+        errors: {
+          password: ['Set a new password to create a linked login for this seller.'],
+        },
+        message: error.message,
+      };
+    }
     return { errors: {}, message: `Database Error: ${dbErrorMessage(error)}` };
   }
 
@@ -174,4 +344,3 @@ export async function authenticate(
     throw error;
   }
 }
-

@@ -4,6 +4,8 @@ import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
+import { assertCanManageSeller } from '@/app/lib/authz';
+import { isAdminEmail, normalizeEmail } from '@/app/lib/auth-constants';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -106,6 +108,15 @@ export async function createProduct(
   if (!data) return { message: 'Please fix the errors below.', errors };
 
   try {
+    await assertCanManageSeller(data.sellerId);
+  } catch {
+    return {
+      message: 'Not authorized to create products for this seller.',
+      errors: {},
+    };
+  }
+
+  try {
     await sql`
       INSERT INTO products (
         seller_id,
@@ -155,7 +166,29 @@ export async function updateProduct(
 
   const { errors, data } = validateProduct(formData);
   if (!data) return { message: 'Please fix the errors below.', errors };
-  const resolvedSellerId = sellerId ?? data.sellerId;
+
+  const existingProduct = await sql<{ seller_id: string | null }[]>`
+    SELECT seller_id
+    FROM products
+    WHERE id = ${id}::uuid
+    LIMIT 1;
+  `;
+
+  const current = existingProduct[0];
+  if (!current) {
+    return { message: 'Product not found.', errors: {} };
+  }
+
+  const resolvedSellerId = current.seller_id ?? sellerId ?? data.sellerId;
+  if (!resolvedSellerId) {
+    return { message: 'Missing seller context for this product.', errors: {} };
+  }
+
+  try {
+    await assertCanManageSeller(resolvedSellerId);
+  } catch {
+    return { message: 'Not authorized to edit this product.', errors: {} };
+  }
 
   try {
     await sql`
@@ -194,7 +227,7 @@ export async function updateProduct(
 
 export async function deleteProductAsOwner(productId: string) {
   const session = await auth();
-  const userEmail = session?.user?.email?.toLowerCase();
+  const userEmail = normalizeEmail(session?.user?.email);
 
   if (!userEmail) {
     throw new Error('You must be logged in.');
@@ -206,11 +239,11 @@ export async function deleteProductAsOwner(productId: string) {
 
   // Verify ownership
   const rows = await sql<
-    { seller_id: string; seller_email: string }[]
+    { seller_id: string | null; seller_email: string | null; product_email: string }[]
   >`
-    SELECT p.seller_id, s.email AS seller_email
+    SELECT p.seller_id, s.email AS seller_email, p.email AS product_email
     FROM products p
-    JOIN sellers s ON s.id = p.seller_id
+    LEFT JOIN sellers s ON s.id = p.seller_id
     WHERE p.id = ${productId}::uuid
     LIMIT 1;
   `;
@@ -218,7 +251,11 @@ export async function deleteProductAsOwner(productId: string) {
   const row = rows[0];
   if (!row) throw new Error('Product not found.');
 
-  if (row.seller_email.toLowerCase() !== userEmail) {
+  const ownerEmail = normalizeEmail(row.seller_email ?? row.product_email);
+  const isOwner = ownerEmail.length > 0 && ownerEmail === userEmail;
+  const isAdmin = isAdminEmail(userEmail);
+
+  if (!isOwner && !isAdmin) {
     throw new Error('Not authorized to delete this product.');
   }
 
@@ -229,7 +266,9 @@ export async function deleteProductAsOwner(productId: string) {
   `;
 
   // Refresh seller product list
-  revalidatePath(`/dashboard/sellers/profile/${row.seller_id}/products`);
+  if (row.seller_id) {
+    revalidatePath(`/dashboard/sellers/profile/${row.seller_id}/products`);
+  }
 
   return { sellerId: row.seller_id };
 }

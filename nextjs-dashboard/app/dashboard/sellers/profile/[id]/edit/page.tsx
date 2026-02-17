@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import Breadcrumbs from '@/app/ui/sellers/breadcrumbs';
 import EditSellerProfileForm from '@/app/ui/sellers/edit-form';
 import { fetchSellerById } from '@/app/lib/seller-data';
+import { getSellerAccess } from '@/app/lib/authz';
 
 export const metadata: Metadata = {
   title: 'Edit Seller Profile',
@@ -24,6 +25,11 @@ export default async function Page({
   const seller = await fetchSellerById(id);
 
   if (!seller) notFound();
+
+  const access = await getSellerAccess(seller.id);
+  if (!access.canManage) {
+    redirect(`/dashboard/sellers/profile/${seller.id}`);
+  }
 
   // Prefer whichever id your seller object actually has
   const sellerId = (seller as any).id ?? (seller as any).seller_id ?? id;

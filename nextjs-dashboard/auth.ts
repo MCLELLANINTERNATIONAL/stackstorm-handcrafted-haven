@@ -5,12 +5,18 @@ import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
+import { normalizeEmail } from '@/app/lib/auth-constants';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
  
 async function getUser(email: string): Promise<User | undefined> {
   try {
-    const user = await sql<User[]>`SELECT * FROM users WHERE email=${email}`;
+    const user = await sql<User[]>`
+      SELECT *
+      FROM users
+      WHERE LOWER(email) = ${normalizeEmail(email)}
+      LIMIT 1
+    `;
     return user[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);

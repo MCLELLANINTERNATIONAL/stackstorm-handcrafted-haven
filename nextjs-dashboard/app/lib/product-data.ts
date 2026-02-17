@@ -187,7 +187,7 @@ export async function fetchProductsByCategory(
   if (!cat) return [];
 
   try {
-    // ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
+    // ✅ ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
     if (cat === 'all-products') {
       const products = await sql<ProductsTableType[]>`
         SELECT
@@ -243,7 +243,7 @@ export async function fetchProductsByCategoryPaginated(
   if (!cat) return [];
 
   try {
-    // ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
+    // ✅ ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
     if (cat === 'all-products') {
       const products = await sql<ProductsTableType[]>`
         SELECT
@@ -296,7 +296,7 @@ export async function fetchCategoryPages(category: CategorySlug | 'all-products'
   if (!cat) return 0;
 
   try {
-    // ALL PRODUCTS (count everything)
+    // ✅ ALL PRODUCTS (count everything)
     if (cat === 'all-products') {
       const data = await sql`
         SELECT COUNT(*)::int AS count
@@ -355,7 +355,7 @@ export async function fetchProductsForCategoryPage(args: {
   const route = String(args.routeCategory).trim().toLowerCase();
 
   try {
-    // all-products (optional category dropdown)
+    // ✅ all-products (optional category dropdown)
     if (route === ALL_PRODUCTS_SLUG) {
       const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
       const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
@@ -376,14 +376,14 @@ export async function fetchProductsForCategoryPage(args: {
             COALESCE(description,'') ILIKE ${`%${q}%`} OR
             price::text ILIKE ${`%${q}%`}
           )
-          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``} -- ✅ CHANGE #1
+          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``}
         ORDER BY created_at DESC
         LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
       `;
       return products;
     }
 
-    // normal category pages
+    // ✅ normal category pages
     const cat = route as CategorySlug;
 
     const products = await sql<ProductsTableType[]>`
@@ -445,7 +445,7 @@ export async function fetchProductsForCategoryPagesCount(args: {
             COALESCE(description,'') ILIKE ${`%${q}%`} OR
             price::text ILIKE ${`%${q}%`}
           )
-          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``}; -- ✅ CHANGE #2
+          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``};
       `;
 
       return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
@@ -463,8 +463,6 @@ export async function fetchProductsForCategoryPagesCount(args: {
           ${q === ''} OR
           product_name ILIKE ${`%${q}%`} OR
           category::text ILIKE ${`%${q}%`} OR
-          COALESCE(email,'') ILIKE ${`%${q}%`} OR
-          COALESCE(contact,'') ILIKE ${`%${q}%`} OR
           COALESCE(email,'') ILIKE ${`%${q}%`} OR
           COALESCE(contact,'') ILIKE ${`%${q}%`} OR
           COALESCE(description,'') ILIKE ${`%${q}%`} OR
