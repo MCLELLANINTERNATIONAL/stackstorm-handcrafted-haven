@@ -306,6 +306,168 @@ export async function fetchCategoryPages(category: CategorySlug | 'all-products'
 }
 
 /* =====================================================
+   FILTER + PRICE RANGE + (OPTIONAL) CATEGORY DROPDOWN
+   Used by category pages with filters, including /all-products
+===================================================== */
+
+const ALL_PRODUCTS_SLUG = 'all-products' as const;
+
+const CATEGORY_SLUGS: readonly CategorySlug[] = [
+  'christmas',
+  'crochet-knitted',
+  'home',
+  'art',
+  'wood',
+] as const;
+
+function isCategorySlug(v: string): v is CategorySlug {
+  return (CATEGORY_SLUGS as readonly string[]).includes(v);
+}
+
+export async function fetchProductsForCategoryPage(args: {
+  routeCategory: CategorySlug | typeof ALL_PRODUCTS_SLUG;
+  currentPage: number;
+  q: string;
+  categoryFilter?: string; // only used for all-products
+  minPrice: number;
+  maxPrice: number;
+}) {
+  const offset = (args.currentPage - 1) * ITEMS_PER_PAGE;
+
+  const q = String(args.q ?? '').trim();
+  const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
+  const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
+
+  const route = String(args.routeCategory).trim().toLowerCase();
+
+  try {
+    // ✅ all-products (optional category dropdown)
+    if (route === ALL_PRODUCTS_SLUG) {
+      const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
+      const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+
+      const products = await sql<ProductsTableType[]>`
+        SELECT
+          id, seller_id, product_name, category, price, email, contact,
+          description, image_url, created_at
+        FROM products
+        WHERE
+          price >= ${min} AND price <= ${max}
+          AND (
+            ${q === ''} OR
+            product_name ILIKE ${`%${q}%`} OR
+            category::text ILIKE ${`%${q}%`} OR
+            COALESCE(email,'') ILIKE ${`%${q}%`} OR
+            COALESCE(contact,'') ILIKE ${`%${q}%`} OR
+            COALESCE(description,'') ILIKE ${`%${q}%`} OR
+            price::text ILIKE ${`%${q}%`}
+          )
+          AND (
+            ${!useCategory} OR category = ${rawCat}::product_category
+          )
+        ORDER BY created_at DESC
+        LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+      `;
+      return products;
+    }
+
+    // ✅ normal category pages
+    const cat = route as CategorySlug;
+
+    const products = await sql<ProductsTableType[]>`
+      SELECT
+        id, seller_id, product_name, category, price, email, contact,
+        description, image_url, created_at
+      FROM products
+      WHERE
+        category = ${cat}::product_category
+        AND price >= ${min} AND price <= ${max}
+        AND (
+          ${q === ''} OR
+          product_name ILIKE ${`%${q}%`} OR
+          category::text ILIKE ${`%${q}%`} OR
+          COALESCE(email,'') ILIKE ${`%${q}%`} OR
+          COALESCE(contact,'') ILIKE ${`%${q}%`} OR
+          COALESCE(description,'') ILIKE ${`%${q}%`} OR
+          price::text ILIKE ${`%${q}%`}
+        )
+      ORDER BY created_at DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+    `;
+    return products;
+  } catch (error) {
+    console.error('Database Error (fetchProductsForCategoryPage):', error);
+    throw new Error('Failed to fetch products for category page.');
+  }
+}
+
+export async function fetchProductsForCategoryPagesCount(args: {
+  routeCategory: CategorySlug | typeof ALL_PRODUCTS_SLUG;
+  q: string;
+  categoryFilter?: string;
+  minPrice: number;
+  maxPrice: number;
+}) {
+  const q = String(args.q ?? '').trim();
+  const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
+  const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
+
+  const route = String(args.routeCategory).trim().toLowerCase();
+
+  try {
+    if (route === ALL_PRODUCTS_SLUG) {
+      const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
+      const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+
+      const data = await sql`
+        SELECT COUNT(*)::int AS count
+        FROM products
+        WHERE
+          price >= ${min} AND price <= ${max}
+          AND (
+            ${q === ''} OR
+            product_name ILIKE ${`%${q}%`} OR
+            category::text ILIKE ${`%${q}%`} OR
+            COALESCE(email,'') ILIKE ${`%${q}%`} OR
+            COALESCE(contact,'') ILIKE ${`%${q}%`} OR
+            COALESCE(description,'') ILIKE ${`%${q}%`} OR
+            price::text ILIKE ${`%${q}%`}
+          )
+          AND (
+            ${!useCategory} OR category = ${rawCat}::product_category
+          );
+      `;
+
+      return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
+    }
+
+    const cat = route as CategorySlug;
+
+    const data = await sql`
+      SELECT COUNT(*)::int AS count
+      FROM products
+      WHERE
+        category = ${cat}::product_category
+        AND price >= ${min} AND price <= ${max}
+        AND (
+          ${q === ''} OR
+          product_name ILIKE ${`%${q}%`} OR
+          category::text ILIKE ${`%${q}%`} OR
+          COALESCE(email,'') ILIKE ${`%${q}%`} OR
+          COALESCE(contact,'') ILIKE ${`%${q}%`} OR
+          COALESCE(description,'') ILIKE ${`%${q}%`} OR
+          price::text ILIKE ${`%${q}%`}
+        );
+    `;
+
+    return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
+  } catch (error) {
+    console.error('Database Error (fetchProductsForCategoryPagesCount):', error);
+    throw new Error('Failed to fetch category pages count.');
+  }
+}
+
+/* =====================================================
   FETCH SELLER PRODUCTS BY SELLER + CATEGORY
   (USED ONLY FOR SELLER PROFILE PRODUCTS PAGE)
 ===================================================== */

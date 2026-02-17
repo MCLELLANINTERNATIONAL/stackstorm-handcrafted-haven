@@ -1,70 +1,56 @@
 'use client';
 
-import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-export default function Pagination({
-  totalPages,
-}: {
+type PaginationProps = {
   totalPages: number;
-}) {
+};
+
+export default function Pagination({ totalPages }: PaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentPage = Number(searchParams.get('page')) || 1;
+  const currentPage = Number(searchParams.get('page') ?? '1') || 1;
 
-  if (totalPages <= 1) return null;
+  if (!totalPages || totalPages <= 1) return null;
 
-  const createPageURL = (pageNumber: number) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('page', pageNumber.toString());
+  function makeHref(page: number) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(page));
     return `${pathname}?${params.toString()}`;
-  };
+  }
+
+  const prevDisabled = currentPage <= 1;
+  const nextDisabled = currentPage >= totalPages;
 
   return (
-    <div className="mt-8 flex items-center justify-center gap-2">
-      {/* Previous Arrow */}
+    <div className="flex items-center gap-2">
       <Link
-        href={createPageURL(currentPage - 1)}
-        className={`flex h-10 w-10 items-center justify-center rounded-md border
-          ${
-            currentPage <= 1
-              ? 'pointer-events-none text-gray-300'
-              : 'hover:bg-gray-100'
-          }`}
+        aria-disabled={prevDisabled}
+        className={`rounded-md border px-3 py-2 text-sm ${
+          prevDisabled ? 'pointer-events-none opacity-50' : 'hover:bg-white'
+        }`}
+        href={makeHref(Math.max(1, currentPage - 1))}
       >
-        <ArrowLeftIcon className="w-4" />
+        Prev
       </Link>
 
-      {/* Page Numbers */}
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-        <Link
-          key={page}
-          href={createPageURL(page)}
-          className={`flex h-10 w-10 items-center justify-center rounded-md border text-sm font-medium
-            ${
-              currentPage === page
-                ? 'bg-blue-600 border-blue-600 text-white'
-                : 'hover:bg-gray-100'
-            }`}
-        >
-          {page}
-        </Link>
-      ))}
+      <div className="text-sm text-gray-600">
+        Page <span className="font-semibold">{currentPage}</span> of{' '}
+        <span className="font-semibold">{totalPages}</span>
+      </div>
 
-      {/* Next Arrow */}
       <Link
-        href={createPageURL(currentPage + 1)}
-        className={`flex h-10 w-10 items-center justify-center rounded-md border
-          ${
-            currentPage >= totalPages
-              ? 'pointer-events-none text-gray-300'
-              : 'hover:bg-gray-100'
-          }`}
+        aria-disabled={nextDisabled}
+        className={`rounded-md border px-3 py-2 text-sm ${
+          nextDisabled ? 'pointer-events-none opacity-50' : 'hover:bg-white'
+        }`}
+        href={makeHref(Math.min(totalPages, currentPage + 1))}
       >
-        <ArrowRightIcon className="w-4" />
+        Next
       </Link>
     </div>
   );
 }
+
