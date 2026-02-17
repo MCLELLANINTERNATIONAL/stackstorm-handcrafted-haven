@@ -1,18 +1,18 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-import DeleteProductForm from '@/app/ui/products/delete-form';
-import { fetchProductById } from '@/app/lib/product-data';
+import DeleteProductForm from "@/app/ui/products/delete-form";
+import { fetchProductById } from "@/app/lib/product-data";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Page({
   params,
 }: {
-  params: { id: string; productId: string };
+  params: Promise<{ id: string; productId: string }>;
 }) {
-  const { id: sellerId, productId } = params;
+  const { id: sellerId, productId } = await params;
 
   if (!sellerId || !productId) notFound();
 
@@ -60,7 +60,7 @@ export default async function Page({
       <div className="max-w-3xl">
         <h1 className="text-2xl font-semibold">Delete Product</h1>
         <p className="mt-2 text-gray-600">
-          Confirm removal of{' '}
+          Confirm removal of{" "}
           <span className="font-semibold">{product.product_name}</span>.
         </p>
 
@@ -71,4 +71,3 @@ export default async function Page({
     </div>
   );
 }
-

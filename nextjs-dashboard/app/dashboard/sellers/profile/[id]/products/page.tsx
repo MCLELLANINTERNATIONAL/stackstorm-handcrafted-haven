@@ -1,14 +1,14 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { lusitana } from '@/app/ui/fonts';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { lusitana } from "@/app/ui/fonts";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { auth } from "@/auth";
+import { fetchSellerById } from "@/app/lib/seller-data";
+import { fetchProductsBySellerId } from "@/app/lib/product-data";
+import ProductCard from "@/app/ui/products/product-card";
+import Search from "@/app/ui/search";
 
-import { auth } from '@/auth';
-import { fetchSellerById } from '@/app/lib/seller-data';
-import { fetchProductsBySellerId } from '@/app/lib/product-data';
-import ProductCard from '@/app/ui/products/product-card';
-import Search from '@/app/ui/search';
-
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type PageProps = {
@@ -16,7 +16,10 @@ type PageProps = {
   searchParams?: Promise<{ query?: string }>;
 };
 
-export default async function SellerProductsPage({ params, searchParams }: PageProps) {
+export default async function SellerProductsPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   if (!id) notFound();
@@ -34,13 +37,13 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
   const allProducts = await fetchProductsBySellerId(seller.id, seller.email);
 
   // search filter (works with your Search component query param)
-  const q = (sp.query ?? '').trim().toLowerCase();
+  const q = (sp.query ?? "").trim().toLowerCase();
   const products =
     q.length === 0
       ? allProducts
       : allProducts.filter((p) => {
-          const haystack = [p.product_name, p.category, p.description ?? '']
-            .join(' ')
+          const haystack = [p.product_name, p.category, p.description ?? ""]
+            .join(" ")
             .toLowerCase();
           return haystack.includes(q);
         });
@@ -116,7 +119,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
           <p className="text-sm text-gray-600">
-            No products found{q ? ` for ‚Äú${sp.query}‚Äù.` : '.'}
+            No products found{q ? ` for ‚Äú${sp.query}‚Äù.` : "."}
           </p>
         ) : (
           products.map((p) => (
@@ -133,7 +136,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
                                shadow-sm transition hover:bg-gray-100 hover:cursor-pointer"
                     title="Edit product"
                   >
-                    ‚úèÔ∏è Edit
+                    <PencilIcon className="w-5" />
                   </Link>
 
                   <Link
@@ -142,7 +145,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
                                shadow-sm transition hover:bg-red-50 hover:cursor-pointer"
                     title="Delete product"
                   >
-                    üóëÔ∏è Delete
+                    <TrashIcon className="w-5" />
                   </Link>
                 </div>
               ) : null}

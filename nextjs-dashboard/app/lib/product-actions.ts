@@ -1,11 +1,11 @@
-'use server';
+"use server";
 
-import postgres from 'postgres';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
+import postgres from "postgres";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 /* =====================================================
    TYPES
@@ -46,33 +46,33 @@ function validateProduct(formData: FormData): {
 } {
   const errors: ProductErrors = {};
 
-  const sellerId = String(formData.get('sellerId') ?? '').trim();
-  const productName = String(formData.get('productName') ?? '').trim();
-  const category = String(formData.get('category') ?? '').trim();
-  const priceRaw = String(formData.get('price') ?? '').trim();
-  const email = String(formData.get('email') ?? '').trim();
-  const contact = String(formData.get('contact') ?? '').trim();
-  const description = String(formData.get('description') ?? '').trim();
-  const imageUrlRaw = String(formData.get('imageUrl') ?? '').trim();
+  const sellerId = String(formData.get("sellerId") ?? "").trim();
+  const productName = String(formData.get("productName") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const priceRaw = String(formData.get("price") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const contact = String(formData.get("contact") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const imageUrlRaw = String(formData.get("imageUrl") ?? "").trim();
 
-  if (!sellerId) errors.sellerId = ['Seller context is required.'];
-  if (!productName) errors.productName = ['Product name is required.'];
-  if (!category) errors.category = ['Category is required.'];
+  if (!sellerId) errors.sellerId = ["Seller context is required."];
+  if (!productName) errors.productName = ["Product name is required."];
+  if (!category) errors.category = ["Category is required."];
 
   const price = Number(priceRaw);
   if (!priceRaw || Number.isNaN(price) || price <= 0) {
-    errors.price = ['Please enter a valid price (greater than 0).'];
+    errors.price = ["Please enter a valid price (greater than 0)."];
   }
 
-  if (!email) errors.email = ['Email is required.'];
-  if (!contact) errors.contact = ['Contact number is required.'];
-  if (!description) errors.description = ['Description is required.'];
+  if (!email) errors.email = ["Email is required."];
+  if (!contact) errors.contact = ["Contact number is required."];
+  if (!description) errors.description = ["Description is required."];
 
   if (
     imageUrlRaw &&
-    !(imageUrlRaw.startsWith('/') || imageUrlRaw.startsWith('http'))
+    !(imageUrlRaw.startsWith("/") || imageUrlRaw.startsWith("http"))
   ) {
-    errors.imageUrl = ['Use a relative path (/) or a full URL (http/https).'];
+    errors.imageUrl = ["Use a relative path (/) or a full URL (http/https)."];
   }
 
   if (Object.keys(errors).length > 0) {
@@ -103,7 +103,7 @@ export async function createProduct(
   formData: FormData,
 ): Promise<ProductState> {
   const { errors, data } = validateProduct(formData);
-  if (!data) return { message: 'Please fix the errors below.', errors };
+  if (!data) return { message: "Please fix the errors below.", errors };
 
   try {
     await sql`
@@ -129,9 +129,9 @@ export async function createProduct(
       );
     `;
   } catch (error) {
-    console.error('Database Error (createProduct):', error);
+    console.error("Database Error (createProduct):", error);
     return {
-      message: 'Database error: failed to create product.',
+      message: "Database error: failed to create product.",
       errors: {},
     };
   }
@@ -151,10 +151,10 @@ export async function updateProduct(
   prevState: ProductState,
   formData: FormData,
 ): Promise<ProductState> {
-  if (!id) return { message: 'Missing product id.', errors: {} };
+  if (!id) return { message: "Missing product id.", errors: {} };
 
   const { errors, data } = validateProduct(formData);
-  if (!data) return { message: 'Please fix the errors below.', errors };
+  if (!data) return { message: "Please fix the errors below.", errors };
   const resolvedSellerId = sellerId ?? data.sellerId;
 
   try {
@@ -171,9 +171,9 @@ export async function updateProduct(
       WHERE id = ${id}::uuid;
     `;
   } catch (error) {
-    console.error('Database Error (updateProduct):', error);
+    console.error("Database Error (updateProduct):", error);
     return {
-      message: 'Database error: failed to update product.',
+      message: "Database error: failed to update product.",
       errors: {},
     };
   }
@@ -184,8 +184,8 @@ export async function updateProduct(
     redirect(`/dashboard/sellers/profile/${resolvedSellerId}/products`);
   }
 
-  revalidatePath('/dashboard/sellers');
-  redirect('/dashboard/sellers');
+  revalidatePath("/dashboard/sellers");
+  redirect("/dashboard/sellers");
 }
 
 /* =====================================================
@@ -197,17 +197,15 @@ export async function deleteProductAsOwner(productId: string) {
   const userEmail = session?.user?.email?.toLowerCase();
 
   if (!userEmail) {
-    throw new Error('You must be logged in.');
+    throw new Error("You must be logged in.");
   }
 
   if (!productId) {
-    throw new Error('Missing product id.');
+    throw new Error("Missing product id.");
   }
 
   // Verify ownership
-  const rows = await sql<
-    { seller_id: string; seller_email: string }[]
-  >`
+  const rows = await sql<{ seller_id: string; seller_email: string }[]>`
     SELECT p.seller_id, s.email AS seller_email
     FROM products p
     JOIN sellers s ON s.id = p.seller_id
@@ -216,10 +214,10 @@ export async function deleteProductAsOwner(productId: string) {
   `;
 
   const row = rows[0];
-  if (!row) throw new Error('Product not found.');
+  if (!row) throw new Error("Product not found.");
 
   if (row.seller_email.toLowerCase() !== userEmail) {
-    throw new Error('Not authorized to delete this product.');
+    throw new Error("Not authorized to delete this product.");
   }
 
   // Delete
