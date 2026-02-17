@@ -12,6 +12,7 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 ===================================================== */
 
 export type ProductErrors = {
+  sellerId?: string[];
   imageUrl?: string[];
   productName?: string[];
   category?: string[];
@@ -33,6 +34,7 @@ export type ProductState = {
 function validateProduct(formData: FormData): {
   errors: ProductErrors;
   data: {
+    sellerId: string;
     productName: string;
     category: string;
     price: number;
@@ -44,6 +46,7 @@ function validateProduct(formData: FormData): {
 } {
   const errors: ProductErrors = {};
 
+  const sellerId = String(formData.get('sellerId') ?? '').trim();
   const productName = String(formData.get('productName') ?? '').trim();
   const category = String(formData.get('category') ?? '').trim();
   const priceRaw = String(formData.get('price') ?? '').trim();
@@ -52,6 +55,7 @@ function validateProduct(formData: FormData): {
   const description = String(formData.get('description') ?? '').trim();
   const imageUrlRaw = String(formData.get('imageUrl') ?? '').trim();
 
+  if (!sellerId) errors.sellerId = ['Seller context is required.'];
   if (!productName) errors.productName = ['Product name is required.'];
   if (!category) errors.category = ['Category is required.'];
 
@@ -78,6 +82,7 @@ function validateProduct(formData: FormData): {
   return {
     errors: {},
     data: {
+      sellerId,
       productName,
       category,
       price,
@@ -103,6 +108,7 @@ export async function createProduct(
   try {
     await sql`
       INSERT INTO products (
+        seller_id,
         product_name,
         category,
         price,
@@ -112,6 +118,7 @@ export async function createProduct(
         image_url
       )
       VALUES (
+        ${data.sellerId}::uuid,
         ${data.productName},
         ${data.category},
         ${data.price},
@@ -129,8 +136,9 @@ export async function createProduct(
     };
   }
 
-  revalidatePath('/dashboard/catalog/products');
-  redirect('/dashboard/catalog/products');
+  revalidatePath(`/dashboard/sellers/profile/${data.sellerId}/products`);
+  revalidatePath(`/dashboard/sellers/profile/${data.sellerId}`);
+  redirect(`/dashboard/sellers/profile/${data.sellerId}/products`);
 }
 
 /* =====================================================
@@ -139,6 +147,7 @@ export async function createProduct(
 
 export async function updateProduct(
   id: string,
+  sellerId: string | undefined,
   prevState: ProductState,
   formData: FormData,
 ): Promise<ProductState> {
@@ -146,6 +155,7 @@ export async function updateProduct(
 
   const { errors, data } = validateProduct(formData);
   if (!data) return { message: 'Please fix the errors below.', errors };
+  const resolvedSellerId = sellerId ?? data.sellerId;
 
   try {
     await sql`
@@ -168,8 +178,14 @@ export async function updateProduct(
     };
   }
 
-  revalidatePath('/dashboard/catalog/products');
-  redirect('/dashboard/catalog/products');
+  if (resolvedSellerId) {
+    revalidatePath(`/dashboard/sellers/profile/${resolvedSellerId}/products`);
+    revalidatePath(`/dashboard/sellers/profile/${resolvedSellerId}`);
+    redirect(`/dashboard/sellers/profile/${resolvedSellerId}/products`);
+  }
+
+  revalidatePath('/dashboard/sellers');
+  redirect('/dashboard/sellers');
 }
 
 /* =====================================================

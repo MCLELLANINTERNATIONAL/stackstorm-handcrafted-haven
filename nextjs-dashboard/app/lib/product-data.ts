@@ -9,10 +9,16 @@ const ITEMS_PER_PAGE = 6;
 /* =====================================================
    FETCH PRODUCTS FOR ONE SELLER
 ===================================================== */
-export async function fetchProductsBySellerId(sellerId: string) {
+export async function fetchProductsBySellerId(
+  sellerId: string,
+  sellerEmail?: string,
+) {
   if (!sellerId) {
     throw new Error('fetchProductsBySellerId: sellerId is required.');
   }
+
+  const normalizedEmail = sellerEmail?.trim().toLowerCase() ?? '';
+  const hasEmailFallback = normalizedEmail.length > 0;
 
   try {
     const products = await sql<ProductsTableType[]>`
@@ -28,7 +34,13 @@ export async function fetchProductsBySellerId(sellerId: string) {
         image_url,
         created_at
       FROM products
-      WHERE seller_id = ${sellerId}::uuid
+      WHERE
+        seller_id = ${sellerId}::uuid
+        OR (
+          seller_id IS NULL
+          AND ${hasEmailFallback}
+          AND LOWER(email) = ${normalizedEmail}
+        )
       ORDER BY created_at DESC;
     `;
     return products;

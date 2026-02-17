@@ -16,19 +16,26 @@ import { Button } from '@/app/ui/button';
 
 export default function EditProductForm({
   product,
+  sellerId,
 }: {
   product: ProductForm;
+  sellerId?: string;
 }) {
   const initialState: ProductState = { message: '', errors: {} };
+  const cancelHref = sellerId
+    ? `/dashboard/sellers/profile/${sellerId}/products`
+    : '/dashboard/sellers';
 
   const action = async (prevState: ProductState, formData: FormData) => {
-    return updateProduct(product.id, prevState, formData);
+    return updateProduct(product.id, sellerId, prevState, formData);
   };
 
   const [state, formAction] = useActionState(action, initialState);
 
   return (
     <form action={formAction}>
+      {sellerId ? <input type="hidden" name="sellerId" value={sellerId} /> : null}
+
       {/* Image URL */}
       <div className="mb-4">
         <label htmlFor="imageUrl" className="mb-2 block text-sm font-medium">
@@ -191,7 +198,7 @@ export default function EditProductForm({
 
       <div className="mt-6 flex justify-end gap-4">
         <Link
-          href="/dashboard/sellers"
+          href={cancelHref}
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 hover:bg-gray-200"
         >
           Cancel
