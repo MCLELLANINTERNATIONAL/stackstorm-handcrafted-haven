@@ -179,7 +179,9 @@ export async function fetchProductById(id: string) {
 /* =====================================================
    FETCH PRODUCTS BY CATEGORY (CATALOG CATEGORY PAGE)
 ===================================================== */
-export async function fetchProductsByCategory(category: CategorySlug | 'all-products') {
+export async function fetchProductsByCategory(
+  category: CategorySlug | 'all-products',
+) {
   const cat = String(category ?? '').trim().toLowerCase();
 
   if (!cat) return [];
@@ -374,9 +376,7 @@ export async function fetchProductsForCategoryPage(args: {
             COALESCE(description,'') ILIKE ${`%${q}%`} OR
             price::text ILIKE ${`%${q}%`}
           )
-          AND (
-            ${!useCategory} OR category = ${rawCat}::product_category
-          )
+          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``}
         ORDER BY created_at DESC
         LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
       `;
@@ -445,9 +445,7 @@ export async function fetchProductsForCategoryPagesCount(args: {
             COALESCE(description,'') ILIKE ${`%${q}%`} OR
             price::text ILIKE ${`%${q}%`}
           )
-          AND (
-            ${!useCategory} OR category = ${rawCat}::product_category
-          );
+          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``};
       `;
 
       return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
