@@ -1,22 +1,25 @@
-import { Suspense } from 'react';
-import { lusitana } from '@/app/ui/fonts';
-import Link from 'next/link';
+import { Suspense } from "react";
+import { lusitana } from "@/app/ui/fonts";
+import Link from "next/link";
 import {
   fetchProductsByCategoryPaginated,
   fetchCategoryPages,
-} from '@/app/lib/product-data';
-import ProductCard from '@/app/ui/products/product-card';
-import Pagination from '@/app/ui/category/pagination';
-import type { CategorySlug } from '@/app/lib/categories';
+} from "@/app/lib/product-data";
+import ProductCard from "@/app/ui/products/product-card";
+import Pagination from "@/app/ui/category/pagination";
+import type { CategorySlug } from "@/app/lib/categories";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: { category: CategorySlug };
   searchParams?: { page?: string };
 };
 
-export default async function CategoryPage({ params, searchParams }: PageProps) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { category } = params;
   const currentPage = Number(searchParams?.page) || 1;
 
@@ -45,13 +48,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
         {products.length === 0 ? (
           <p className="text-sm text-gray-600">No products in this category.</p>
         ) : (
-          products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              categoryFrom={category}
-            />
-          ))
+          <ProductCard products={products} categoryFrom={category} />
         )}
       </div>
 
@@ -65,5 +62,3 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     </div>
   );
 }
-
-

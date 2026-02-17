@@ -1,8 +1,8 @@
-import postgres from 'postgres';
-import type { ProductForm, ProductsTableType } from './definitions';
-import type { CategorySlug } from './categories';
+import postgres from "postgres";
+import type { ProductForm, ProductsTableType } from "./definitions";
+import type { CategorySlug } from "./categories";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 const ITEMS_PER_PAGE = 6;
 
@@ -11,7 +11,7 @@ const ITEMS_PER_PAGE = 6;
 ===================================================== */
 export async function fetchProductsBySellerId(sellerId: string) {
   if (!sellerId) {
-    throw new Error('fetchProductsBySellerId: sellerId is required.');
+    throw new Error("fetchProductsBySellerId: sellerId is required.");
   }
 
   try {
@@ -33,8 +33,8 @@ export async function fetchProductsBySellerId(sellerId: string) {
     `;
     return products;
   } catch (error) {
-    console.error('Database Error (fetchProductsBySellerId):', error);
-    throw new Error('Failed to fetch products for this seller.');
+    console.error("Database Error (fetchProductsBySellerId):", error);
+    throw new Error("Failed to fetch products for this seller.");
   }
 }
 
@@ -60,8 +60,8 @@ export async function fetchProducts() {
     `;
     return products;
   } catch (error) {
-    console.error('Database Error (fetchProducts):', error);
-    throw new Error('Failed to fetch all products.');
+    console.error("Database Error (fetchProducts):", error);
+    throw new Error("Failed to fetch all products.");
   }
 }
 
@@ -101,8 +101,8 @@ export async function fetchFilteredProducts(
     `;
     return products;
   } catch (error) {
-    console.error('Database Error (fetchFilteredProducts):', error);
-    throw new Error('Failed to fetch products.');
+    console.error("Database Error (fetchFilteredProducts):", error);
+    throw new Error("Failed to fetch products.");
   }
 }
 
@@ -124,14 +124,12 @@ export async function fetchProductsPages(query: string) {
         created_at::text ILIKE ${`%${query}%`};
     `;
 
-    const totalPages = Math.ceil(
-      Number(data[0].count ?? 0) / ITEMS_PER_PAGE,
-    );
+    const totalPages = Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
 
     return totalPages;
   } catch (error) {
-    console.error('Database Error (fetchProductsPages):', error);
-    throw new Error('Failed to fetch total number of products.');
+    console.error("Database Error (fetchProductsPages):", error);
+    throw new Error("Failed to fetch total number of products.");
   }
 }
 
@@ -141,7 +139,7 @@ export async function fetchProductsPages(query: string) {
 export async function fetchProductById(id: string) {
   if (!id) {
     throw new Error(
-      'fetchProductById: id is required (received undefined/empty).',
+      "fetchProductById: id is required (received undefined/empty).",
     );
   }
 
@@ -165,18 +163,16 @@ export async function fetchProductById(id: string) {
 
     return data[0] ?? null;
   } catch (error) {
-    console.error('Database Error (fetchProductById):', error);
-    throw new Error('Failed to fetch product.');
+    console.error("Database Error (fetchProductById):", error);
+    throw new Error("Failed to fetch product.");
   }
 }
 
 /* =====================================================
    FETCH PRODUCTS BY CATEGORY (CATALOG CATEGORY PAGE)
 ===================================================== */
-export async function fetchProductsByCategory(
-  category: CategorySlug,
-) {
-  const cat = String(category ?? '')
+export async function fetchProductsByCategory(category: CategorySlug) {
+  const cat = String(category ?? "")
     .trim()
     .toLowerCase() as CategorySlug;
 
@@ -201,25 +197,19 @@ export async function fetchProductsByCategory(
     `;
     return products;
   } catch (error) {
-    console.error(
-      'Database Error (fetchProductsByCategory):',
-      error,
-    );
-    throw new Error('Failed to fetch products by category.');
+    console.error("Database Error (fetchProductsByCategory):", error);
+    throw new Error("Failed to fetch products by category.");
   }
 }
 
-/* =====================================================
-   FETCH PRODUCTS BY CATEGORY (PAGINATED)
-===================================================== */
 export async function fetchProductsByCategoryPaginated(
-  category: CategorySlug,
+  user_categories: CategorySlug | undefined,
   currentPage: number,
 ) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  if (!user_categories) return [];
 
-  const cat = String(category).trim().toLowerCase() as CategorySlug;
-  if (!cat) return [];
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  const cat = user_categories.trim().toLowerCase() as CategorySlug;
 
   try {
     const products = await sql<ProductsTableType[]>`
@@ -239,10 +229,11 @@ export async function fetchProductsByCategoryPaginated(
       ORDER BY created_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
     `;
+
     return products;
   } catch (error) {
-    console.error('Database Error (fetchProductsByCategoryPaginated):', error);
-    throw new Error('Failed to fetch paginated products by category.');
+    console.error("Database Error (fetchProductsByCategoryPaginated):", error);
+    throw new Error("Failed to fetch paginated products by category.");
   }
 }
 
@@ -263,11 +254,10 @@ export async function fetchCategoryPages(category: CategorySlug) {
     const totalPages = Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
-    console.error('Database Error (fetchCategoryPages):', error);
-    throw new Error('Failed to fetch category pages.');
+    console.error("Database Error (fetchCategoryPages):", error);
+    throw new Error("Failed to fetch category pages.");
   }
 }
-
 
 /* =====================================================
   FETCH SELLER PRODUCTS BY SELLER + CATEGORY
@@ -277,7 +267,7 @@ export async function fetchProductsBySellerIdAndCategory(
   sellerId: string,
   category: CategorySlug | string,
 ) {
-  const cat = String(category ?? '')
+  const cat = String(category ?? "")
     .trim()
     .toLowerCase() as CategorySlug;
 
@@ -304,12 +294,9 @@ export async function fetchProductsBySellerIdAndCategory(
     return products;
   } catch (error) {
     console.error(
-      'Database Error (fetchProductsBySellerIdAndCategory):',
+      "Database Error (fetchProductsBySellerIdAndCategory):",
       error,
     );
-    throw new Error(
-      'Failed to fetch seller products by category.',
-    );
+    throw new Error("Failed to fetch seller products by category.");
   }
 }
-

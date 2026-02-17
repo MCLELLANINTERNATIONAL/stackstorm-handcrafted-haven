@@ -1,39 +1,39 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { lusitana } from '@/app/ui/fonts';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { lusitana } from "@/app/ui/fonts";
 import {
   fetchProductsByCategoryPaginated,
   fetchCategoryPages,
-} from '@/app/lib/product-data';
-import ProductCard from '@/app/ui/products/product-card';
-import Pagination from '@/app/ui/category/pagination';
-import type { CategorySlug } from '@/app/lib/categories';
+} from "@/app/lib/product-data";
+import ProductCard from "@/app/ui/products/product-card";
+import Pagination from "@/app/ui/category/pagination";
+import type { CategorySlug } from "@/app/lib/categories";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type PageProps = {
-  params: Promise<{ category: CategorySlug }>;
+  params: { user_categories: CategorySlug };
   searchParams?: { page?: string };
 };
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { category } = await params;
-  return { title: `Products • ${category}` };
+  const { user_categories } = params;
+  return { title: `Products • ${user_categories}` };
 }
 
 export default async function CategoryPage({
   params,
   searchParams,
 }: PageProps) {
-  const { category } = await params;
+  const { user_categories } = params;
   const currentPage = Number(searchParams?.page) || 1;
 
   const [products, totalPages] = await Promise.all([
-    fetchProductsByCategoryPaginated(category, currentPage),
-    fetchCategoryPages(category),
+    fetchProductsByCategoryPaginated(user_categories, currentPage),
+    fetchCategoryPages(user_categories),
   ]);
 
   return (
@@ -65,20 +65,24 @@ export default async function CategoryPage({
 
           <li className="text-gray-400">/</li>
 
-          <li className="font-semibold text-gray-900 capitalize">{category}</li>
+          <li className="font-semibold text-gray-900 capitalize">
+            {user_categories}
+          </li>
         </ol>
       </nav>
 
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className={`${lusitana.className} text-2xl text-sky-800 capitalize`}>
-            {category}
+          <h1
+            className={`${lusitana.className} text-2xl text-sky-800 capitalize`}
+          >
+            {user_categories}
           </h1>
 
           <p className="mt-1 text-sm text-gray-600">
-            Browse products in{' '}
-            <span className="font-semibold capitalize">{category}</span>
+            Browse products in{" "}
+            <span className="font-semibold capitalize">{user_categories}</span>
           </p>
         </div>
 
@@ -96,13 +100,7 @@ export default async function CategoryPage({
         {products.length === 0 ? (
           <p className="text-sm text-gray-600">No products in this category.</p>
         ) : (
-          products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              categoryFrom={category}
-            />
-          ))
+          <ProductCard products={products} categoryFrom={user_categories} />
         )}
       </div>
 
@@ -115,4 +113,3 @@ export default async function CategoryPage({
     </div>
   );
 }
-

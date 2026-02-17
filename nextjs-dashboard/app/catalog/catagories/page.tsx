@@ -1,7 +1,7 @@
-import { lusitana } from '@/app/ui/fonts';
-import Link from 'next/link';
-import Image from 'next/image';
-import { CATEGORIES } from '@/app/lib/categories';
+import { lusitana } from "@/app/ui/fonts";
+import Link from "next/link";
+import Image from "next/image";
+import { CATEGORIES } from "@/app/lib/categories";
 
 export default function CategoriesPage() {
   return (
@@ -14,7 +14,7 @@ export default function CategoriesPage() {
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.slug}
-            href={`/dashboard/catalog/categories/${cat.slug}`}
+            href={`/categories/${cat.slug}`}
             className="rounded-lg bg-white p-4 shadow hover:shadow-md transition"
           >
             {cat.imagePath && (
@@ -27,9 +27,7 @@ export default function CategoriesPage() {
               />
             )}
 
-            <h2 className="text-lg font-semibold text-gray-800">
-              {cat.label}
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-800">{cat.label}</h2>
           </Link>
         ))}
       </div>
