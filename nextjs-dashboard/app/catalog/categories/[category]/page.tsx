@@ -4,6 +4,8 @@ import { lusitana } from '@/app/ui/fonts';
 import {
   fetchProductsByCategoryPaginated,
   fetchCategoryPages,
+  fetchFilteredProducts,
+  fetchProductsPages,
 } from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
 import Pagination from '@/app/ui/category/pagination';
@@ -13,15 +15,18 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 type PageProps = {
-  params: Promise<{ category: CategorySlug }>;
-  searchParams?: { page?: string };
+  // ✅ allow "all-products" (and "all" if needed) to come through this route
+  params: Promise<{ category: CategorySlug | 'all' | 'all-products' }>;
+  // ✅ Next 16 can treat searchParams as a Promise
+  searchParams?: Promise<{ page?: string; query?: string }>;
 };
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { category } = await params;
-  return { title: `Products • ${category}` };
+  const isAll = category === 'all' || category === 'all-products';
+  return { title: isAll ? 'Products • All Products' : `Products • ${category}` };
 }
 
 export default async function CategoryPage({
@@ -29,12 +34,22 @@ export default async function CategoryPage({
   searchParams,
 }: PageProps) {
   const { category } = await params;
-  const currentPage = Number(searchParams?.page) || 1;
+  const sp = (await searchParams) ?? {};
+  const currentPage = Number(sp.page ?? '1') || 1;
 
-  const [products, totalPages] = await Promise.all([
-    fetchProductsByCategoryPaginated(category, currentPage),
-    fetchCategoryPages(category),
-  ]);
+  const isAll = category === 'all' || category === 'all-products';
+
+  const [products, totalPages] = await Promise.all(
+    isAll
+      ? [
+          fetchFilteredProducts(sp.query ?? '', currentPage),
+          fetchProductsPages(sp.query ?? ''),
+        ]
+      : [
+          fetchProductsByCategoryPaginated(category as CategorySlug, currentPage),
+          fetchCategoryPages(category as CategorySlug),
+        ],
+  );
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
@@ -65,7 +80,9 @@ export default async function CategoryPage({
 
           <li className="text-gray-400">/</li>
 
-          <li className="font-semibold text-gray-900 capitalize">{category}</li>
+          <li className="font-semibold text-gray-900 capitalize">
+            {isAll ? 'All Products' : category}
+          </li>
         </ol>
       </nav>
 
@@ -73,12 +90,18 @@ export default async function CategoryPage({
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className={`${lusitana.className} text-2xl text-sky-800 capitalize`}>
-            {category}
+            {isAll ? 'All Products' : category}
           </h1>
 
           <p className="mt-1 text-sm text-gray-600">
-            Browse products in{' '}
-            <span className="font-semibold capitalize">{category}</span>
+            {isAll ? (
+              <>Browse all products</>
+            ) : (
+              <>
+                Browse products in{' '}
+                <span className="font-semibold capitalize">{category}</span>
+              </>
+            )}
           </p>
         </div>
 
@@ -94,13 +117,15 @@ export default async function CategoryPage({
       {/* Grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
-          <p className="text-sm text-gray-600">No products in this category.</p>
+          <p className="text-sm text-gray-600">
+            {isAll ? 'No products found.' : 'No products in this category.'}
+          </p>
         ) : (
           products.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
-              categoryFrom={category}
+              categoryFrom={isAll ? ('all-products' as any) : (category as CategorySlug)}
             />
           ))
         )}
@@ -115,4 +140,3 @@ export default async function CategoryPage({
     </div>
   );
 }
-

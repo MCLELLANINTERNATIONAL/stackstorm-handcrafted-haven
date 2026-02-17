@@ -68,10 +68,7 @@ export async function fetchProducts() {
 /* =====================================================
    FILTERED PRODUCTS (SEARCH)
 ===================================================== */
-export async function fetchFilteredProducts(
-  query: string,
-  currentPage: number,
-) {
+export async function fetchFilteredProducts(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
@@ -90,10 +87,10 @@ export async function fetchFilteredProducts(
       FROM products
       WHERE
         product_name ILIKE ${`%${query}%`} OR
-        category ILIKE ${`%${query}%`} OR
-        email ILIKE ${`%${query}%`} OR
-        contact ILIKE ${`%${query}%`} OR
-        description ILIKE ${`%${query}%`} OR
+        category::text ILIKE ${`%${query}%`} OR
+        COALESCE(email,'') ILIKE ${`%${query}%`} OR
+        COALESCE(contact,'') ILIKE ${`%${query}%`} OR
+        COALESCE(description,'') ILIKE ${`%${query}%`} OR
         price::text ILIKE ${`%${query}%`} OR
         created_at::text ILIKE ${`%${query}%`}
       ORDER BY created_at DESC
@@ -116,18 +113,15 @@ export async function fetchProductsPages(query: string) {
       FROM products
       WHERE
         product_name ILIKE ${`%${query}%`} OR
-        category ILIKE ${`%${query}%`} OR
-        email ILIKE ${`%${query}%`} OR
-        contact ILIKE ${`%${query}%`} OR
-        description ILIKE ${`%${query}%`} OR
+        category::text ILIKE ${`%${query}%`} OR
+        COALESCE(email,'') ILIKE ${`%${query}%`} OR
+        COALESCE(contact,'') ILIKE ${`%${query}%`} OR
+        COALESCE(description,'') ILIKE ${`%${query}%`} OR
         price::text ILIKE ${`%${query}%`} OR
         created_at::text ILIKE ${`%${query}%`};
     `;
 
-    const totalPages = Math.ceil(
-      Number(data[0].count ?? 0) / ITEMS_PER_PAGE,
-    );
-
+    const totalPages = Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
     return totalPages;
   } catch (error) {
     console.error('Database Error (fetchProductsPages):', error);
@@ -173,16 +167,32 @@ export async function fetchProductById(id: string) {
 /* =====================================================
    FETCH PRODUCTS BY CATEGORY (CATALOG CATEGORY PAGE)
 ===================================================== */
-export async function fetchProductsByCategory(
-  category: CategorySlug,
-) {
-  const cat = String(category ?? '')
-    .trim()
-    .toLowerCase() as CategorySlug;
+export async function fetchProductsByCategory(category: CategorySlug | 'all-products') {
+  const cat = String(category ?? '').trim().toLowerCase();
 
   if (!cat) return [];
 
   try {
+    // ✅ ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
+    if (cat === 'all-products') {
+      const products = await sql<ProductsTableType[]>`
+        SELECT
+          id,
+          seller_id,
+          product_name,
+          category,
+          price,
+          email,
+          contact,
+          description,
+          image_url,
+          created_at
+        FROM products
+        ORDER BY created_at DESC;
+      `;
+      return products;
+    }
+
     const products = await sql<ProductsTableType[]>`
       SELECT
         id,
@@ -201,10 +211,7 @@ export async function fetchProductsByCategory(
     `;
     return products;
   } catch (error) {
-    console.error(
-      'Database Error (fetchProductsByCategory):',
-      error,
-    );
+    console.error('Database Error (fetchProductsByCategory):', error);
     throw new Error('Failed to fetch products by category.');
   }
 }
@@ -213,15 +220,36 @@ export async function fetchProductsByCategory(
    FETCH PRODUCTS BY CATEGORY (PAGINATED)
 ===================================================== */
 export async function fetchProductsByCategoryPaginated(
-  category: CategorySlug,
+  category: CategorySlug | 'all-products',
   currentPage: number,
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const cat = String(category).trim().toLowerCase() as CategorySlug;
+  const cat = String(category ?? '').trim().toLowerCase();
   if (!cat) return [];
 
   try {
+    // ✅ ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
+    if (cat === 'all-products') {
+      const products = await sql<ProductsTableType[]>`
+        SELECT
+          id,
+          seller_id,
+          product_name,
+          category,
+          price,
+          email,
+          contact,
+          description,
+          image_url,
+          created_at
+        FROM products
+        ORDER BY created_at DESC
+        LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+      `;
+      return products;
+    }
+
     const products = await sql<ProductsTableType[]>`
       SELECT
         id,
@@ -249,11 +277,20 @@ export async function fetchProductsByCategoryPaginated(
 /* =====================================================
    TOTAL CATEGORY PAGES (CATEGORY PAGINATION)
 ===================================================== */
-export async function fetchCategoryPages(category: CategorySlug) {
-  const cat = String(category).trim().toLowerCase() as CategorySlug;
+export async function fetchCategoryPages(category: CategorySlug | 'all-products') {
+  const cat = String(category ?? '').trim().toLowerCase();
   if (!cat) return 0;
 
   try {
+    // ✅ ALL PRODUCTS (count everything)
+    if (cat === 'all-products') {
+      const data = await sql`
+        SELECT COUNT(*)::int AS count
+        FROM products;
+      `;
+      return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
+    }
+
     const data = await sql`
       SELECT COUNT(*)::int AS count
       FROM products
@@ -268,7 +305,6 @@ export async function fetchCategoryPages(category: CategorySlug) {
   }
 }
 
-
 /* =====================================================
   FETCH SELLER PRODUCTS BY SELLER + CATEGORY
   (USED ONLY FOR SELLER PROFILE PRODUCTS PAGE)
@@ -277,9 +313,7 @@ export async function fetchProductsBySellerIdAndCategory(
   sellerId: string,
   category: CategorySlug | string,
 ) {
-  const cat = String(category ?? '')
-    .trim()
-    .toLowerCase() as CategorySlug;
+  const cat = String(category ?? '').trim().toLowerCase() as CategorySlug;
 
   if (!sellerId || !cat) return [];
 
@@ -303,13 +337,7 @@ export async function fetchProductsBySellerIdAndCategory(
     `;
     return products;
   } catch (error) {
-    console.error(
-      'Database Error (fetchProductsBySellerIdAndCategory):',
-      error,
-    );
-    throw new Error(
-      'Failed to fetch seller products by category.',
-    );
+    console.error('Database Error (fetchProductsBySellerIdAndCategory):', error);
+    throw new Error('Failed to fetch seller products by category.');
   }
 }
-
