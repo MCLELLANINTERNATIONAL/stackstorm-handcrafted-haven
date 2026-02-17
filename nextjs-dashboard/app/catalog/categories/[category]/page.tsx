@@ -2,10 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
 import {
-  fetchProductsByCategoryPaginated,
-  fetchCategoryPages,
-  fetchFilteredProducts,
-  fetchProductsPages,
+  fetchProductsForCategoryPage,
+  fetchProductsForCategoryPagesCount,
 } from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
 import Pagination from '@/app/ui/category/pagination';
@@ -16,10 +14,14 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 type PageProps = {
-  // ✅ allow "all-products" (and "all" if needed) to come through this route
   params: Promise<{ category: CategorySlug | 'all' | 'all-products' }>;
-  // ✅ Next 16 can treat searchParams as a Promise
-  searchParams?: Promise<{ page?: string; query?: string }>;
+  searchParams?: Promise<{
+    page?: string;
+    q?: string;
+    category?: string;
+    minPrice?: string;
+    maxPrice?: string;
+  }>;
 };
 
 export async function generateMetadata({
@@ -27,7 +29,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { category } = await params;
   const isAll = category === 'all' || category === 'all-products';
-  return { title: isAll ? 'Products • All Products' : `Products • ${category}` };
+  return { title: isAll ? 'Products ‚Ä¢ All Products' : `Products ‚Ä¢ ${category}` };
 }
 
 export default async function CategoryPage({
@@ -36,25 +38,40 @@ export default async function CategoryPage({
 }: PageProps) {
   const { category } = await params;
   const sp = (await searchParams) ?? {};
-  const currentPage = Number(sp.page ?? '1') || 1;
+  const currentPage = Math.max(1, Number(sp.page ?? '1') || 1);
 
   const isAll = category === 'all' || category === 'all-products';
+  const routeCategory = isAll ? 'all-products' : (category as CategorySlug);
 
-  const [products, totalPages] = await Promise.all(
-    isAll
-      ? [
-          fetchFilteredProducts(sp.query ?? '', currentPage),
-          fetchProductsPages(sp.query ?? ''),
-        ]
-      : [
-          fetchProductsByCategoryPaginated(category as CategorySlug, currentPage),
-          fetchCategoryPages(category as CategorySlug),
-        ],
-  );
+  const q = String(sp.q ?? '').trim();
+  const categoryFilter = String(sp.category ?? 'all').trim().toLowerCase();
+
+  const parsedMin = Number(sp.minPrice ?? '0');
+  const parsedMax = Number(sp.maxPrice ?? '500');
+  const minPrice = Number.isFinite(parsedMin) ? parsedMin : 0;
+  const maxPrice = Number.isFinite(parsedMax) ? parsedMax : 500;
+
+  const [products, totalPages] = await Promise.all([
+    fetchProductsForCategoryPage({
+      routeCategory,
+      currentPage,
+      q,
+      categoryFilter,
+      minPrice,
+      maxPrice,
+    }),
+    fetchProductsForCategoryPagesCount({
+      routeCategory,
+      q,
+      categoryFilter,
+      minPrice,
+      maxPrice,
+    }),
+  ]);
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
-      {/* 🧭 Breadcrumbs */}
+      {/* üß≠ Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
@@ -115,7 +132,7 @@ export default async function CategoryPage({
         </Link>
       </div>
 
-      {/* ✅ Filters */}
+      {/* Filters */}
       <div className="mt-4">
         <ProductFilters
           showCategoryFilter={isAll}
@@ -158,4 +175,3 @@ export default async function CategoryPage({
     </div>
   );
 }
-

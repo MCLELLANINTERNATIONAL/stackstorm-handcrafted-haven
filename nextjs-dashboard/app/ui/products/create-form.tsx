@@ -12,12 +12,22 @@ import {
 
 import { createProduct, type ProductState } from '@/app/lib/product-actions';
 
-export default function ProductForm() {
+export default function ProductForm({
+  sellerId,
+  defaultEmail = '',
+  cancelHref = '/dashboard/sellers',
+}: {
+  sellerId?: string;
+  defaultEmail?: string;
+  cancelHref?: string;
+}) {
   const initialState: ProductState = { message: '', errors: {} };
   const [state, formAction] = useActionState(createProduct, initialState);
 
   return (
     <form action={formAction}>
+      {sellerId ? <input type="hidden" name="sellerId" value={sellerId} /> : null}
+
       {/* Image URL */}
       <div className="mb-4">
         <label htmlFor="imageUrl" className="mb-2 block text-sm font-medium">
@@ -143,6 +153,7 @@ export default function ProductForm() {
               name="email"
               type="email"
               placeholder="seller@email.com"
+              defaultValue={defaultEmail}
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="email-error"
             />
@@ -218,7 +229,7 @@ export default function ProductForm() {
       {/* Actions */}
       <div className="mt-6 flex justify-center gap-4">
         <Link
-          href="/dashboard/sellers"
+          href={cancelHref}
           className="inline-flex h-11 w-56 items-center justify-center rounded-lg bg-gray-200 px-4 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300"
         >
           Cancel

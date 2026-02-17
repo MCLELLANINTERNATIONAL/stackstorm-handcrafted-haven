@@ -13,11 +13,12 @@ export const revalidate = 0;
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams?: { query?: string };
+  searchParams?: Promise<{ query?: string }>;
 };
 
 export default async function SellerProductsPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const sp = (await searchParams) ?? {};
   if (!id) notFound();
 
   const seller = await fetchSellerById(id);
@@ -30,10 +31,10 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
     session!.user!.email!.toLowerCase() === seller.email.toLowerCase();
 
   // ALL products for this seller
-  const allProducts = await fetchProductsBySellerId(seller.id);
+  const allProducts = await fetchProductsBySellerId(seller.id, seller.email);
 
   // search filter (works with your Search component query param)
-  const q = (searchParams?.query ?? '').trim().toLowerCase();
+  const q = (sp.query ?? '').trim().toLowerCase();
   const products =
     q.length === 0
       ? allProducts
@@ -96,9 +97,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
 
           {isOwner ? (
             <Link
-              href={`/dashboard/sellers/profile/products/create?sellerId=${encodeURIComponent(
-                seller.id,
-              )}`}
+              href={`/dashboard/sellers/profile/${seller.id}/products/create`}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white
                          transition-colors hover:bg-green-600 hover:cursor-pointer"
             >
@@ -110,14 +109,14 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
 
       {/* Search */}
       <div className="mt-4 max-w-md">
-        <Search placeholder="Search this seller’s products..." />
+        <Search placeholder="Search this seller‚Äôs products..." />
       </div>
 
       {/* Products grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
           <p className="text-sm text-gray-600">
-            No products found{q ? ` for “${searchParams?.query}”.` : '.'}
+            No products found{q ? ` for ‚Äú${sp.query}‚Äù.` : '.'}
           </p>
         ) : (
           products.map((p) => (
@@ -134,7 +133,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
                                shadow-sm transition hover:bg-gray-100 hover:cursor-pointer"
                     title="Edit product"
                   >
-                    ✏️ Edit
+                    ‚úèÔ∏è Edit
                   </Link>
 
                   <Link
@@ -143,7 +142,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
                                shadow-sm transition hover:bg-red-50 hover:cursor-pointer"
                     title="Delete product"
                   >
-                    🗑️ Delete
+                    üóëÔ∏è Delete
                   </Link>
                 </div>
               ) : null}
