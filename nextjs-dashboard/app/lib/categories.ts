@@ -5,8 +5,10 @@ export type CategorySlug =
   | 'christmas'
   | 'crochet-knitted';
 
+export type CatalogCategorySlug = CategorySlug | 'all-products';
+
 export type Category = {
-  slug: CategorySlug;
+  slug: CatalogCategorySlug;
   label: string;
   imagePath: string;
   description: string;
@@ -47,6 +49,10 @@ export const CATEGORIES: readonly Category[] = [
     description:
       'Handcrafted wood pieces for home and office.',
   },
-  
+  {
+    slug: 'all-products',
+    label: 'All Products',
+    imagePath: '/products/all/hero-desktop.png',
+    description: 'Browse all handcrafted products in one place.',
+  },
 ] as const;
-
