@@ -10,6 +10,7 @@ import {
 import ProductCard from '@/app/ui/products/product-card';
 import Pagination from '@/app/ui/category/pagination';
 import type { CategorySlug } from '@/app/lib/categories';
+import ProductFilters from '@/app/ui/products/product-filters';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -114,6 +115,23 @@ export default async function CategoryPage({
         </Link>
       </div>
 
+      {/* ✅ Filters */}
+      <div className="mt-4">
+        <ProductFilters
+          showCategoryFilter={isAll}
+          categories={[
+            { value: 'all', label: 'All categories' },
+            { value: 'christmas', label: 'Christmas' },
+            { value: 'crochet-knitted', label: 'Crochet & Knitted' },
+            { value: 'home', label: 'Home' },
+            { value: 'art', label: 'Art' },
+            { value: 'wood', label: 'Wood' },
+          ]}
+          priceMinLimit={0}
+          priceMaxLimit={500}
+        />
+      </div>
+
       {/* Grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
@@ -140,3 +158,4 @@ export default async function CategoryPage({
     </div>
   );
 }
+
