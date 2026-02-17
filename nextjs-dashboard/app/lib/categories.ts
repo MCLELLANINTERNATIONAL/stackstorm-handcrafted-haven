@@ -1,5 +1,3 @@
-// app/lib/categories.ts
-
 export type CategorySlug =
   | 'wood'
   | 'home'
@@ -49,5 +47,6 @@ export const CATEGORIES: readonly Category[] = [
     description:
       'Handcrafted wood pieces for home and office.',
   },
+  
 ] as const;
 

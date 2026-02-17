@@ -37,6 +37,12 @@ export default function CategoryCard() {
       imagePath: "/products/wood/w4.png",
       description: "Beautiful wood craft for your home and office decoration.",
     },
+    {
+      slug: "all-products",
+      name: "All Products",
+      imagePath: "/products/all/hero-desktop.png",
+      description: "Beautiful handcrafted products.",
+    }, 
   ] as const;
 
   return (
