@@ -6,6 +6,7 @@ import type { ProductsTableType } from '@/app/lib/definitions';
 type ProductCardProps = {
   product: ProductsTableType;
   categoryFrom?: string;
+  sellerFromId?: string;
   sourceSellerId?: string;
 };
 
