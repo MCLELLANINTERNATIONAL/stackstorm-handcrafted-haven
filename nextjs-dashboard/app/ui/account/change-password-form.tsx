@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { KeyIcon } from '@heroicons/react/24/outline';
-import { changeMyPassword, type PasswordState } from '@/app/lib/user-actions';
+import { changeMyPassword, type PasswordState } from '@/app/lib/account-actions';
 import { Button } from '@/app/ui/button';
 
 const initialState: PasswordState = {

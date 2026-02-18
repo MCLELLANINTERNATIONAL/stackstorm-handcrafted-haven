@@ -6,18 +6,23 @@ import type { ProductsTableType } from '@/app/lib/definitions';
 type ProductCardProps = {
   product: ProductsTableType;
   categoryFrom?: string;
-  sellerFromId?: string;
+  sourceSellerId?: string;
 };
 
 export default function ProductCard({
   product,
   categoryFrom,
+  sourceSellerId,
 }: ProductCardProps) {
-  const href = categoryFrom
-    ? `/catalog/products/${product.id}?from=category&category=${encodeURIComponent(
-        categoryFrom,
+  const href = sourceSellerId
+    ? `/catalog/products/${product.id}?from=seller&sellerId=${encodeURIComponent(
+        sourceSellerId,
       )}`
-    : `/catalog/products/${product.id}`;
+    : categoryFrom
+      ? `/catalog/products/${product.id}?from=category&category=${encodeURIComponent(
+          categoryFrom,
+        )}`
+      : `/catalog/products/${product.id}`;
 
   return (
     <Link href={href} className="block group">
