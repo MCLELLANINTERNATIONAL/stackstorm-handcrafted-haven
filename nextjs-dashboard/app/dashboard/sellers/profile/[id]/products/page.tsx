@@ -136,7 +136,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
                                shadow-sm transition hover:bg-gray-100 hover:cursor-pointer"
                     title="Edit product"
                   >
-                    ‚úèÔ∏è Edit
+                    Edit
                   </Link>
 
                   <Link
@@ -145,7 +145,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
                                shadow-sm transition hover:bg-red-50 hover:cursor-pointer"
                     title="Delete product"
                   >
-                    üóëÔ∏è Delete
+                    Delete
                   </Link>
                 </div>
               ) : null}
