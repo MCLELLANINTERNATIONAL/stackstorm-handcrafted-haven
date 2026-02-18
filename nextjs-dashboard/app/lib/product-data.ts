@@ -1,3 +1,4 @@
+// app/lib/product-data.ts
 import postgres from 'postgres';
 import type { ProductForm, ProductsTableType } from './definitions';
 import type { CategorySlug } from './categories';
@@ -187,7 +188,7 @@ export async function fetchProductsByCategory(
   if (!cat) return [];
 
   try {
-    // ✅ ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
+    // ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
     if (cat === 'all-products') {
       const products = await sql<ProductsTableType[]>`
         SELECT
@@ -511,5 +512,123 @@ export async function fetchProductsBySellerIdAndCategory(
   } catch (error) {
     console.error('Database Error (fetchProductsBySellerIdAndCategory):', error);
     throw new Error('Failed to fetch seller products by category.');
+  }
+}
+
+/* =====================================================
+  FETCH SELLER PRODUCTS (PUBLIC VIEW) WITH FILTERS
+  ✅ MIN FIX: do NOT cast "all" to product_category enum
+===================================================== */
+export async function fetchProductsForSellerPage(args: {
+  sellerId: string;
+  sellerEmail?: string;
+  currentPage: number;
+  q: string;
+  categoryFilter?: string;
+  minPrice: number;
+  maxPrice: number;
+}) {
+  const offset = (args.currentPage - 1) * ITEMS_PER_PAGE;
+  const q = String(args.q ?? '').trim();
+  const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
+  const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
+
+  const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
+  const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+
+  const sellerId = String(args.sellerId ?? '').trim();
+  const sellerEmail = String(args.sellerEmail ?? '').trim().toLowerCase();
+  const useEmailFallback = sellerEmail.length > 0;
+
+  if (!sellerId) return [];
+
+  try {
+    const products = await sql<ProductsTableType[]>`
+      SELECT
+        id, seller_id, product_name, category, price, email, contact,
+        description, image_url, created_at
+      FROM products
+      WHERE
+        (
+          seller_id = ${sellerId}::uuid
+          OR (
+            seller_id IS NULL
+            AND ${useEmailFallback}
+            AND LOWER(email) = ${sellerEmail}
+          )
+        )
+        AND price >= ${min} AND price <= ${max}
+        AND (
+          ${q === ''} OR
+          product_name ILIKE ${`%${q}%`} OR
+          category::text ILIKE ${`%${q}%`} OR
+          COALESCE(email,'') ILIKE ${`%${q}%`} OR
+          COALESCE(contact,'') ILIKE ${`%${q}%`} OR
+          COALESCE(description,'') ILIKE ${`%${q}%`} OR
+          price::text ILIKE ${`%${q}%`}
+        )
+        ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``}
+      ORDER BY created_at DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+    `;
+
+    return products;
+  } catch (error) {
+    console.error('Database Error (fetchProductsForSellerPage):', error);
+    throw new Error('Failed to fetch seller products.');
+  }
+}
+
+export async function fetchProductsForSellerPagesCount(args: {
+  sellerId: string;
+  sellerEmail?: string;
+  q: string;
+  categoryFilter?: string;
+  minPrice: number;
+  maxPrice: number;
+}) {
+  const q = String(args.q ?? '').trim();
+  const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
+  const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
+
+  const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
+  const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+
+  const sellerId = String(args.sellerId ?? '').trim();
+  const sellerEmail = String(args.sellerEmail ?? '').trim().toLowerCase();
+  const useEmailFallback = sellerEmail.length > 0;
+
+  if (!sellerId) return 0;
+
+  try {
+    const data = await sql`
+      SELECT COUNT(*)::int AS count
+      FROM products
+      WHERE
+        (
+          seller_id = ${sellerId}::uuid
+          OR (
+            seller_id IS NULL
+            AND ${useEmailFallback}
+            AND LOWER(email) = ${sellerEmail}
+          )
+        )
+        AND price >= ${min} AND price <= ${max}
+        AND (
+          ${q === ''} OR
+          product_name ILIKE ${`%${q}%`} OR
+          category::text ILIKE ${`%${q}%`} OR
+          COALESCE(email,'') ILIKE ${`%${q}%`} OR
+          COALESCE(contact,'') ILIKE ${`%${q}%`} OR
+          COALESCE(description,'') ILIKE ${`%${q}%`} OR
+          price::text ILIKE ${`%${q}%`}
+        )
+        ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``};
+    `;
+
+    return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
+  } catch (error) {
+    console.error('Database Error (fetchProductsForSellerPagesCount):', error);
+    throw new Error('Failed to fetch seller products pages count.');
   }
 }

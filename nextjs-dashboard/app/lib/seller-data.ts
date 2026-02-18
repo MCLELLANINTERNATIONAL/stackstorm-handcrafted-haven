@@ -115,6 +115,44 @@ export async function fetchSellerById(id: string) {
   }
 }
 
+export async function fetchSellerByProductId(productId: string) {
+  if (!productId) {
+    throw new Error(
+      'fetchSellerByProductId: productId is required (received undefined/empty).',
+    );
+  }
+
+  try {
+    const rows = await sql<SellerForm[]>`
+      SELECT
+        s.id,
+        s.seller_name,
+        s.category,
+        s.email,
+        s.contact_no,
+        s.created_at,
+        s.story,
+        s.image_url
+      FROM products p
+      JOIN sellers s
+        ON (
+          s.id = p.seller_id
+          OR (
+            p.seller_id IS NULL
+            AND LOWER(s.email) = LOWER(p.email)
+          )
+        )
+      WHERE p.id = ${productId}::uuid
+      LIMIT 1;
+    `;
+
+    return rows[0] ?? null;
+  } catch (error) {
+    console.error('Database Error (fetchSellerByProductId):', error);
+    throw new Error('Failed to fetch seller for product.');
+  }
+}
+
 /**
  * Sellers dashboard cards data
  * NOTE: Adjust table names to match your schema.
