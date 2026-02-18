@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { inter } from '@/app/ui/fonts';
-import type { ProductsTableType } from '@/app/lib/definitions';
+import Link from "next/link";
+import Image from "next/image";
+import { inter } from "@/app/ui/fonts";
+import type { ProductsTableType } from "@/app/lib/definitions";
 
 type ProductCardProps = {
   product: ProductsTableType;
@@ -16,16 +16,15 @@ export default function ProductCard({
     ? `/catalog/products/${product.id}?from=category&category=${encodeURIComponent(
         categoryFrom,
       )}`
-    : `/catalog/products/${product.id}`;
+    : `products/${product.id}`;
 
   return (
     <Link href={href} className="block group">
-      <div className="w-60 overflow-hidden rounded-lg bg-gray-100 p-2 shadow-md shadow-gray-400 transition-transform transition-shadow duration-200 hover:shadow-lg hover:scale-[1.02]">
-
+      <div className="w-60 overflow-hidden rounded-lg bg-gray-100 p-2 shadow-md shadow-gray-400 transition-transform  duration-200 hover:shadow-lg hover:scale-[1.02]">
         {/* Image */}
         <div className="relative h-44 w-full overflow-hidden rounded-lg bg-white flex items-center justify-center">
           <Image
-            src={product.image_url || '/products/placeholder.jpg'}
+            src={product.image_url || "/products/placeholder.jpg"}
             alt={product.product_name}
             fill
             className="object-contain transition-transform duration-200 group-hover:scale-105"
