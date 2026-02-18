@@ -25,7 +25,6 @@ const FormSchema = z.object({
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
-// Use Zod to update the expected types
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 export type State = {
@@ -38,7 +37,6 @@ export type State = {
 };
  
 export async function createInvoice(prevState: State, formData: FormData) {
-    {/*const { customerId, amount, status } = CreateInvoice.parse({*/}
   const validatedFields = CreateInvoice.safeParse({
       customerId: formData.get('customerId'),
       amount: formData.get('amount'),
@@ -63,7 +61,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
   } catch (error) {
-    // We'll also log the error to the console for now
+    // log the error to the console for now
     console.error(error);
     return {
       message: 'Database Error: Failed to Create Invoice.',

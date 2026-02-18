@@ -1,6 +1,6 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
+// Type definitions for your data.
+// Describes the shape of the data, and what data type each property should accept.
+// However, these types are generated automatically
 // =======================
 // Users
 // =======================

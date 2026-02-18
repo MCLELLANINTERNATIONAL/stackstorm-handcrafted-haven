@@ -30,7 +30,7 @@ export default function DeleteSellerForm({ sellerId }: { sellerId: string }) {
         Type <span className="font-semibold">DELETE</span> below to confirm.
       </p>
 
-      {/* Simple confirmation gate to prevent accidental deletion */}
+      {/* Confirmation gate to prevent accidental deletion */}
       <label htmlFor="confirm" className="sr-only">
         Confirmation text
       </label>

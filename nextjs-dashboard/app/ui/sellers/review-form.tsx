@@ -64,15 +64,15 @@ export default function ReviewForm({ sellerId }: { sellerId: string }) {
   return (
     <form
       action={async (fd) => {
-        // Inject star rating into form data (server action expects "rating")
+        // Injects star rating into form data (server action expects "rating")
         fd.set('rating', String(rating));
 
-        // Ensure sellerId is present (DB-generated sellers.id)
+        // Ensures sellerId is present (DB-generated sellers.id)
         fd.set('sellerId', sellerId);
 
         await formAction(fd);
 
-        // Refresh UI after submit (so new review appears)
+        // Refreshs UI after submit (so new review appears)
         router.refresh();
       }}
       className="mt-6 space-y-4"

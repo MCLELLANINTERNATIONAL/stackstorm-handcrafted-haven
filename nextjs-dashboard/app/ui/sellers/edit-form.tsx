@@ -24,7 +24,7 @@ export default function EditSellerProfileForm({ seller }: { seller: SellerForm }
   const initialState: State = { message: '', errors: {} };
 
   const action = async (prevState: State, formData: FormData) => {
-    // ✅ Uses ONLY Postgres-generated UUID
+    // Uses ONLY Postgres-generated UUID
     return updateSeller(seller.id!, prevState, formData);
   };
 
@@ -270,4 +270,3 @@ export default function EditSellerProfileForm({ seller }: { seller: SellerForm }
     </form>
   );
 }
-

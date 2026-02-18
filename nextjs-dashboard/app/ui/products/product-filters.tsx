@@ -15,7 +15,7 @@ export default function ProductFilters({
   categories: CategoryOption[];
   priceMinLimit?: number;
   priceMaxLimit?: number;
-  showCategoryFilter?: boolean; // ✅ optional now
+  showCategoryFilter?: boolean; 
 }) {
   const router = useRouter();
   const pathname = usePathname();

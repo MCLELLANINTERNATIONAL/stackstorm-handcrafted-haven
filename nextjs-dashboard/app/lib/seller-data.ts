@@ -156,13 +156,12 @@ export async function fetchSellerByProductId(productId: string) {
 /**
  * Sellers dashboard cards data
  * NOTE: Adjust table names to match your schema.
- * If you're using seller_reviews table, update the reviewCount query accordingly.
+ * If using seller_reviews table, update the reviewCount query accordingly.
  */
 export async function fetchSellerCardData() {
   try {
     const sellerCountPromise = sql`SELECT COUNT(*)::int AS count FROM sellers`;
     const productCountPromise = sql`SELECT COUNT(*)::int AS count FROM products`;
-    // If your reviews table is seller_reviews, use that:
     const reviewCountPromise = sql`SELECT COUNT(*)::int AS count FROM seller_reviews`;
 
     const [sellerCount, productCount, reviewCount] = await Promise.all([

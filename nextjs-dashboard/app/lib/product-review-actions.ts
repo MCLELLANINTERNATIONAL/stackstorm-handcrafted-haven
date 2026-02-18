@@ -38,7 +38,6 @@ export async function createProductReview(
     errors.comment = ['Comment is required.'];
   }
 
-  // Optional name (but nice to have)
   const customerName = customerNameRaw || 'Customer';
 
   if (Object.keys(errors).length > 0) {
@@ -50,7 +49,7 @@ export async function createProductReview(
     VALUES (${productId}::uuid, ${rating}, ${comment}, ${customerName});
   `;
 
-  // Revalidate the product + catalog pages (adjust to your routes)
+  // Revalidate the product + catalog pages
   revalidatePath('/catalog');
   revalidatePath('/catalog/products');
   revalidatePath(`/catalog/products/${productId}`);

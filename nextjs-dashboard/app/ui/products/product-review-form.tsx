@@ -11,7 +11,7 @@ import {
 } from '@/app/lib/product-review-actions';
 
 /**
- * Same star UI pattern as seller reviews
+ * Star UI pattern as seller reviews
  */
 function StarRating({
   rating,
