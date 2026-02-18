@@ -1,3 +1,4 @@
+// app/lib/product-data.ts
 import postgres from 'postgres';
 import type { ProductForm, ProductsTableType } from './definitions';
 import type { CategorySlug } from './categories';
@@ -516,6 +517,7 @@ export async function fetchProductsBySellerIdAndCategory(
 
 /* =====================================================
   FETCH SELLER PRODUCTS (PUBLIC VIEW) WITH FILTERS
+  ✅ MIN FIX: do NOT cast "all" to product_category enum
 ===================================================== */
 export async function fetchProductsForSellerPage(args: {
   sellerId: string;
@@ -530,8 +532,10 @@ export async function fetchProductsForSellerPage(args: {
   const q = String(args.q ?? '').trim();
   const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
   const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
+
   const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
   const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+
   const sellerId = String(args.sellerId ?? '').trim();
   const sellerEmail = String(args.sellerEmail ?? '').trim().toLowerCase();
   const useEmailFallback = sellerEmail.length > 0;
@@ -563,9 +567,7 @@ export async function fetchProductsForSellerPage(args: {
           COALESCE(description,'') ILIKE ${`%${q}%`} OR
           price::text ILIKE ${`%${q}%`}
         )
-        AND (
-          ${!useCategory} OR category = ${rawCat}::product_category
-        )
+        ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``}
       ORDER BY created_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
     `;
@@ -588,8 +590,10 @@ export async function fetchProductsForSellerPagesCount(args: {
   const q = String(args.q ?? '').trim();
   const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
   const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
+
   const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
   const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+
   const sellerId = String(args.sellerId ?? '').trim();
   const sellerEmail = String(args.sellerEmail ?? '').trim().toLowerCase();
   const useEmailFallback = sellerEmail.length > 0;
@@ -619,9 +623,7 @@ export async function fetchProductsForSellerPagesCount(args: {
           COALESCE(description,'') ILIKE ${`%${q}%`} OR
           price::text ILIKE ${`%${q}%`}
         )
-        AND (
-          ${!useCategory} OR category = ${rawCat}::product_category
-        );
+        ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``};
     `;
 
     return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);

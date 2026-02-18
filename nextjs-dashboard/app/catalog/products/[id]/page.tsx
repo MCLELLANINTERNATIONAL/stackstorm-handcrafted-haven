@@ -7,6 +7,9 @@ import {
   fetchProductAverageRating,
   fetchProductReviewsByProductId,
 } from '@/app/lib/product-review-data';
+
+import { fetchSellerByProductId } from '@/app/lib/seller-data';
+
 import ProductReviewForm from '@/app/ui/products/product-review-form';
 import { formatDateToLocal } from '@/app/lib/utils';
 
@@ -29,6 +32,9 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
   const product = await fetchProductById(id);
   if (!product) notFound();
+
+  // ✅ NEW: resolve seller via product
+  const seller = await fetchSellerByProductId(product.id);
 
   const sp = (await searchParams) ?? {};
   const category = sp.category?.trim();
@@ -87,15 +93,27 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
       {/* Product section */}
       <section className="mb-10 flex flex-col gap-6 md:flex-row">
-        <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl border bg-white">
-          <Image
-            src={product.image_url || '/products/placeholder.jpg'}
-            alt={product.product_name}
-            fill
-            className="object-contain object-center"
-            sizes="224px"
-            priority
-          />
+        <div className="w-56 flex-shrink-0">
+          <div className="relative h-56 w-56 overflow-hidden rounded-xl border bg-white">
+            <Image
+              src={product.image_url || '/products/placeholder.jpg'}
+              alt={product.product_name}
+              fill
+              className="object-contain object-center"
+              sizes="224px"
+              priority
+            />
+          </div>
+
+          {/* ✅ NEW BUTTON */}
+          {seller ? (
+            <Link
+              href={`/catalog/sellers/${seller.id}`}
+              className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-green-600"
+            >
+              Seller&apos;s Story
+            </Link>
+          ) : null}
         </div>
 
         <div className="flex-1">
@@ -168,7 +186,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           </div>
         )}
 
-        {/* ✅ Public review form (no auth gate) */}
         <div className="mt-6">
           <ProductReviewForm productId={product.id} />
         </div>
