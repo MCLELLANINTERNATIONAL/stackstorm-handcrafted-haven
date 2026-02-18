@@ -1,85 +1,60 @@
-import Link from 'next/link';
+import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
-import { fetchProductById } from '@/app/lib/product-data';
+import Breadcrumbs from '@/app/ui/sellers/breadcrumbs';
+import EditSellerProfileForm from '@/app/ui/sellers/edit-form';
 import { fetchSellerById } from '@/app/lib/seller-data';
-import EditProductForm from '@/app/ui/products/edit-form';
 import { getSellerAccess } from '@/app/lib/authz';
+
+export const metadata: Metadata = {
+  title: 'Edit Seller Profile',
+};
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-type PageProps = {
-  params: Promise<{ id: string; productId: string }>;
-};
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-export default async function Page({ params }: PageProps) {
-  const { id: sellerId, productId } = await params;
+  if (!id) notFound();
 
-  if (!sellerId || !productId) notFound();
+  const seller = await fetchSellerById(id);
 
-  const product = await fetchProductById(productId);
-  if (!product) notFound();
-  if (product.seller_id && product.seller_id !== sellerId) notFound();
-
-  const seller = await fetchSellerById(sellerId);
   if (!seller) notFound();
 
   const access = await getSellerAccess(seller.id);
   if (!access.canManage) {
-    redirect(`/dashboard/sellers/profile/${sellerId}/products`);
+    redirect(`/dashboard/sellers/profile/${seller.id}`);
   }
 
+  const sellerId = (seller as any).id ?? (seller as any).seller_id ?? id;
+
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      {/* Breadcrumbs */}
-      <nav className="mb-4 text-sm text-gray-600">
-        <ol className="flex flex-wrap items-center gap-2">
-          <li>
-            <Link href="/dashboard/sellers" className="hover:underline">
-              Sellers
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
-          <li>
-            <Link
-              href={`/dashboard/sellers/profile/${sellerId}`}
-              className="hover:underline"
-            >
-              Profile
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
-          <li>
-            <Link
-              href={`/dashboard/sellers/profile/${sellerId}/products`}
-              className="hover:underline"
-            >
-              Products
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
-          <li className="font-semibold text-gray-900">Edit</li>
-        </ol>
-      </nav>
+    <main className="max-w-4xl">
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: 'Sellers', href: '/dashboard/sellers' },
+          { label: 'Profile', href: `/dashboard/sellers/profile/${sellerId}` },
+          {
+            label: 'Edit',
+            href: `/dashboard/sellers/profile/${sellerId}/edit`,
+            active: true,
+          },
+        ]}
+      />
 
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Edit Product</h1>
+      <h1 className="text-2xl font-semibold">Edit Seller Profile</h1>
+      <p className="mt-2 text-gray-600">
+        Update your story, links, and profile details.
+      </p>
 
-        <Link
-          href={`/dashboard/sellers/profile/${sellerId}/products`}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white
-                     transition-colors hover:bg-green-600 hover:cursor-pointer"
-        >
-          Back to products
-        </Link>
+      <div className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
+        <EditSellerProfileForm seller={seller} />
       </div>
-
-      {/* Form */}
-      <section className="rounded-xl border bg-white p-6">
-        <EditProductForm product={product} sellerId={sellerId} />
-      </section>
     </main>
   );
 }
