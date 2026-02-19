@@ -9,7 +9,7 @@ import ProductCard from '@/app/ui/products/product-card';
 import Search from '@/app/ui/search';
 import { isAdminEmail } from '@/app/lib/auth-constants';
 
-// ✅ icon buttons for edit/delete
+// icon buttons for edit/delete
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 export const dynamic = 'force-dynamic';
@@ -53,7 +53,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
           return haystack.includes(q);
         });
 
-  // ✅ pagination (kept minimal)
+  // pagination (kept minimal)
   const currentPage = Math.max(1, Number(sp.page ?? 1) || 1);
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
