@@ -9,9 +9,6 @@ import {
 } from "@/app/lib/product-review-data";
 import ProductReviewForm from "@/app/ui/products/product-review-form";
 import { formatDateToLocal } from "@/app/lib/utils";
-// from the manage page
-import { auth } from "@/auth";
-import { isAdminEmail } from "@/app/lib/auth-constants";
 
 function stars(rating: number) {
   const r = Math.max(0, Math.min(5, Math.round(rating)));
@@ -35,14 +32,6 @@ export default async function ProductDetailPage({
 
   const product = await fetchProductById(productId);
   if (!product) notFound();
-
-  // Owner check
-  const session = await auth();
-  const userEmail = session?.user?.email?.toLowerCase() ?? "";
-  const isAdmin = isAdminEmail(userEmail);
-  const isOwner =
-    userEmail.length > 0 && userEmail === product.email.toLowerCase();
-  const canManage = isOwner || isAdmin;
 
   const sp = (await searchParams) ?? {};
   const category = sp.category?.trim();
@@ -148,29 +137,6 @@ export default async function ProductDetailPage({
             {product.contact && <p className="text-sm">{product.contact}</p>}
           </div>
         </div>
-
-        {/* Owner-only edit/delete icons under the card */}
-        {canManage ? (
-          <div className="mt-2 flex justify-end gap-2">
-            <Link
-              href={`/dashboard/sellers/profile/${product.seller_id}/products/${product.id}/edit`}
-              className="rounded-md bg-white px-3 py-1 text-xs font-bold text-gray-800
-                               shadow-sm transition hover:bg-gray-100 hover:cursor-pointer"
-              title="Edit product"
-            >
-              ‚úèÔ∏è Edit
-            </Link>
-
-            <Link
-              href={`/dashboard/sellers/profile/${product.seller_id}/products/${product.id}/delete`}
-              className="rounded-md bg-white px-3 py-1 text-xs font-bold text-red-600
-                               shadow-sm transition hover:bg-red-50 hover:cursor-pointer"
-              title="Delete product"
-            >
-              üóëÔ∏è Delete
-            </Link>
-          </div>
-        ) : null}
       </section>
 
       {/* Reviews */}
