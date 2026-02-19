@@ -21,12 +21,12 @@ export default function LoginPage() {
         <Suspense>
           <LoginForm />
         </Suspense>
-        <div className={`${inter.className}`}>
+        <div className={`${inter.className} flex justify-between`}>
           <p className="text-xs">
-            Sign up as a seller if you don't already have an account
+            Sign up for an account, if you don't previously have.
           </p>
           <Link href={"/sign-up"} className="text-blue-500 text-sm">
-            Sign Up
+            <strong>Sign Up</strong>
           </Link>
         </div>
       </div>

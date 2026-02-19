@@ -23,7 +23,7 @@ export default function ProductCard({
       ? `/catalog/products/${product.id}?from=category&category=${encodeURIComponent(
           categoryFrom,
         )}`
-      : `/catalog/products/${product.id}`;
+      : `products/${product.id}`;
 
   return (
     <Link href={href} className="block group">
@@ -33,9 +33,9 @@ export default function ProductCard({
           <Image
             src={product.image_url || "/products/placeholder.jpg"}
             alt={product.product_name}
-            fill
-            className="object-contain transition-transform duration-200 group-hover:scale-105"
-            sizes="240px"
+            className="h-full w-full object-cover"
+            width={240}
+            height={176}
           />
         </div>
 
