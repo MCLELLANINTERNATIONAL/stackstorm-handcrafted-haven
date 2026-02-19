@@ -181,6 +181,10 @@ export default async function SellerProductDetailPage({
           </div>
         )}
 
+<<<<<<< HEAD
+=======
+        {/* Public review form (no auth gate) */}
+>>>>>>> 18f5b169cfca271b8411e729479a490dbd280519
         <div className="mt-6">
           <ProductReviewForm productId={product.id} />
         </div>
