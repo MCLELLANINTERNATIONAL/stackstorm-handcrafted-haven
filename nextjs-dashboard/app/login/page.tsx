@@ -21,6 +21,11 @@ export default function LoginPage() {
         <Suspense>
           <LoginForm />
         </Suspense>
+
+        <Link href="/reset-user-password" className="text-sm text-blue-500">
+          Forgot password?
+        </Link>
+
         <div className={`${inter.className} flex justify-between`}>
           <p className="text-xs">
             Sign up for an account, if you don't previously have.
