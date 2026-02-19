@@ -20,14 +20,12 @@ export const revalidate = 0;
 
 type PageProps = {
   params: Promise<{
-    id: string;          // ✅ sellerId from route
+    id: string; // ✅ sellerId from route
     productId: string;
   }>;
 };
 
-export default async function SellerProductDetailPage({
-  params,
-}: PageProps) {
+export default async function SellerProductDetailPage({ params }: PageProps) {
   const { id: sellerId, productId } = await params;
 
   if (!productId) notFound();
@@ -44,7 +42,6 @@ export default async function SellerProductDetailPage({
 
   return (
     <main className="mx-auto max-w-6xl p-6">
-
       {/* Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
@@ -181,10 +178,6 @@ export default async function SellerProductDetailPage({
           </div>
         )}
 
-<<<<<<< HEAD
-=======
-        {/* Public review form (no auth gate) */}
->>>>>>> 18f5b169cfca271b8411e729479a490dbd280519
         <div className="mt-6">
           <ProductReviewForm productId={product.id} />
         </div>
