@@ -8,14 +8,17 @@ import { fetchProductsBySellerId } from '@/app/lib/product-data';
 import ProductCard from '@/app/ui/products/product-card';
 import Search from '@/app/ui/search';
 import { isAdminEmail } from '@/app/lib/auth-constants';
+import SellerPagination from '@/app/ui/sellers/pagination';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ query?: string }>;
+  searchParams?: Promise<{ query?: string; page?: string }>; 
 };
+
+const ITEMS_PER_PAGE = 6; // 
 
 export default async function SellerProductsPage({ params, searchParams }: PageProps) {
   const { id } = await params;
@@ -29,8 +32,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
   const session = await auth();
   const userEmail = session?.user?.email?.toLowerCase() ?? '';
   const isAdmin = isAdminEmail(userEmail);
-  const isOwner =
-    userEmail.length > 0 && userEmail === seller.email.toLowerCase();
+  const isOwner = userEmail.length > 0 && userEmail === seller.email.toLowerCase();
   const canManage = isOwner || isAdmin;
 
   // ALL products for this seller
@@ -38,7 +40,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
 
   // search filter (works with your Search component query param)
   const q = (sp.query ?? '').trim().toLowerCase();
-  const products =
+  const filtered =
     q.length === 0
       ? allProducts
       : allProducts.filter((p) => {
@@ -47,6 +49,12 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
             .toLowerCase();
           return haystack.includes(q);
         });
+
+  // pagination (minimal, in-memory slice)
+  const currentPage = Math.max(1, Number(sp.page ?? '1') || 1);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const products = filtered.slice(start, start + ITEMS_PER_PAGE);
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
@@ -66,10 +74,7 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
           </li>
           <li className="text-gray-400">/</li>
           <li>
-            <Link
-              href={`/dashboard/sellers/profile/${seller.id}`}
-              className="hover:underline"
-            >
+            <Link href={`/dashboard/sellers/profile/${seller.id}`} className="hover:underline">
               {seller.seller_name}
             </Link>
           </li>
@@ -112,14 +117,14 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
 
       {/* Search */}
       <div className="mt-4 max-w-md">
-        <Search placeholder="Search this seller‚Äôs products..." />
+        <Search placeholder="Search this seller’s products..." />
       </div>
 
       {/* Products grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {products.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="text-sm text-gray-600">
-            No products found{q ? ` for ‚Äú${sp.query}‚Äù.` : '.'}
+            No products found{q ? ` for “${sp.query}”.` : '.'}
           </p>
         ) : (
           products.map((p) => (
@@ -153,6 +158,13 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
           ))
         )}
       </div>
+
+      {/* pagination */}
+      {filtered.length > 0 && totalPages > 1 ? (
+        <div className="mt-8 flex justify-center">
+          <SellerPagination totalPages={totalPages} />
+        </div>
+      ) : null}
     </div>
   );
 }
