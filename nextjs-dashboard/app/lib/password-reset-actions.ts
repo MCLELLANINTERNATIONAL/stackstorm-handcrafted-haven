@@ -149,7 +149,7 @@ export async function resetPasswordWithToken(
 
   if (!newPassword) {
     errors.newPassword = ['New password is required.'];
-  } else if (newPassword.length < 8) {
+  } else if (newPassword.length < 6) {
     errors.newPassword = ['New password must be at least 8 characters.'];
   }
 
