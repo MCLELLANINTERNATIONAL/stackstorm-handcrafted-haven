@@ -1,13 +1,13 @@
-'use server';
+"use server";
 
-import postgres from 'postgres';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
-import { assertCanManageSeller } from '@/app/lib/authz';
-import { isAdminEmail, normalizeEmail } from '@/app/lib/auth-constants';
+import postgres from "postgres";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { assertCanManageSeller } from "@/app/lib/authz";
+import { isAdminEmail, normalizeEmail } from "@/app/lib/auth-constants";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 /* =====================================================
    TYPES
@@ -48,33 +48,33 @@ function validateProduct(formData: FormData): {
 } {
   const errors: ProductErrors = {};
 
-  const sellerId = String(formData.get('sellerId') ?? '').trim();
-  const productName = String(formData.get('productName') ?? '').trim();
-  const category = String(formData.get('category') ?? '').trim();
-  const priceRaw = String(formData.get('price') ?? '').trim();
-  const email = String(formData.get('email') ?? '').trim();
-  const contact = String(formData.get('contact') ?? '').trim();
-  const description = String(formData.get('description') ?? '').trim();
-  const imageUrlRaw = String(formData.get('imageUrl') ?? '').trim();
+  const sellerId = String(formData.get("sellerId") ?? "").trim();
+  const productName = String(formData.get("productName") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const priceRaw = String(formData.get("price") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const contact = String(formData.get("contact") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const imageUrlRaw = String(formData.get("imageUrl") ?? "").trim();
 
-  if (!sellerId) errors.sellerId = ['Seller context is required.'];
-  if (!productName) errors.productName = ['Product name is required.'];
-  if (!category) errors.category = ['Category is required.'];
+  if (!sellerId) errors.sellerId = ["Seller context is required."];
+  if (!productName) errors.productName = ["Product name is required."];
+  if (!category) errors.category = ["Category is required."];
 
   const price = Number(priceRaw);
   if (!priceRaw || Number.isNaN(price) || price <= 0) {
-    errors.price = ['Please enter a valid price (greater than 0).'];
+    errors.price = ["Please enter a valid price (greater than 0)."];
   }
 
-  if (!email) errors.email = ['Email is required.'];
-  if (!contact) errors.contact = ['Contact number is required.'];
-  if (!description) errors.description = ['Description is required.'];
+  if (!email) errors.email = ["Email is required."];
+  if (!contact) errors.contact = ["Contact number is required."];
+  if (!description) errors.description = ["Description is required."];
 
   if (
     imageUrlRaw &&
-    !(imageUrlRaw.startsWith('/') || imageUrlRaw.startsWith('http'))
+    !(imageUrlRaw.startsWith("/") || imageUrlRaw.startsWith("http"))
   ) {
-    errors.imageUrl = ['Use a relative path (/) or a full URL (http/https).'];
+    errors.imageUrl = ["Use a relative path (/) or a full URL (http/https)."];
   }
 
   if (Object.keys(errors).length > 0) {
@@ -105,13 +105,13 @@ export async function createProduct(
   formData: FormData,
 ): Promise<ProductState> {
   const { errors, data } = validateProduct(formData);
-  if (!data) return { message: 'Please fix the errors below.', errors };
+  if (!data) return { message: "Please fix the errors below.", errors };
 
   try {
     await assertCanManageSeller(data.sellerId);
   } catch {
     return {
-      message: 'Not authorized to create products for this seller.',
+      message: "Not authorized to create products for this seller.",
       errors: {},
     };
   }
@@ -140,9 +140,9 @@ export async function createProduct(
       );
     `;
   } catch (error) {
-    console.error('Database Error (createProduct):', error);
+    console.error("Database Error (createProduct):", error);
     return {
-      message: 'Database error: failed to create product.',
+      message: "Database error: failed to create product.",
       errors: {},
     };
   }
@@ -162,10 +162,10 @@ export async function updateProduct(
   prevState: ProductState,
   formData: FormData,
 ): Promise<ProductState> {
-  if (!id) return { message: 'Missing product id.', errors: {} };
+  if (!id) return { message: "Missing product id.", errors: {} };
 
   const { errors, data } = validateProduct(formData);
-  if (!data) return { message: 'Please fix the errors below.', errors };
+  if (!data) return { message: "Please fix the errors below.", errors };
 
   const existingProduct = await sql<{ seller_id: string | null }[]>`
     SELECT seller_id
@@ -176,18 +176,18 @@ export async function updateProduct(
 
   const current = existingProduct[0];
   if (!current) {
-    return { message: 'Product not found.', errors: {} };
+    return { message: "Product not found.", errors: {} };
   }
 
   const resolvedSellerId = current.seller_id ?? sellerId ?? data.sellerId;
   if (!resolvedSellerId) {
-    return { message: 'Missing seller context for this product.', errors: {} };
+    return { message: "Missing seller context for this product.", errors: {} };
   }
 
   try {
     await assertCanManageSeller(resolvedSellerId);
   } catch {
-    return { message: 'Not authorized to edit this product.', errors: {} };
+    return { message: "Not authorized to edit this product.", errors: {} };
   }
 
   try {
@@ -204,9 +204,9 @@ export async function updateProduct(
       WHERE id = ${id}::uuid;
     `;
   } catch (error) {
-    console.error('Database Error (updateProduct):', error);
+    console.error("Database Error (updateProduct):", error);
     return {
-      message: 'Database error: failed to update product.',
+      message: "Database error: failed to update product.",
       errors: {},
     };
   }
@@ -217,8 +217,8 @@ export async function updateProduct(
     redirect(`/dashboard/sellers/profile/${resolvedSellerId}/products`);
   }
 
-  revalidatePath('/dashboard/sellers');
-  redirect('/dashboard/sellers');
+  revalidatePath("/dashboard/sellers");
+  redirect("/dashboard/sellers");
 }
 
 /* =====================================================
@@ -230,16 +230,20 @@ export async function deleteProductAsOwner(productId: string) {
   const userEmail = normalizeEmail(session?.user?.email);
 
   if (!userEmail) {
-    throw new Error('You must be logged in.');
+    throw new Error("You must be logged in.");
   }
 
   if (!productId) {
-    throw new Error('Missing product id.');
+    throw new Error("Missing product id.");
   }
 
   // Verify ownership
   const rows = await sql<
-    { seller_id: string | null; seller_email: string | null; product_email: string }[]
+    {
+      seller_id: string | null;
+      seller_email: string | null;
+      product_email: string;
+    }[]
   >`
     SELECT p.seller_id, s.email AS seller_email, p.email AS product_email
     FROM products p
@@ -249,14 +253,14 @@ export async function deleteProductAsOwner(productId: string) {
   `;
 
   const row = rows[0];
-  if (!row) throw new Error('Product not found.');
+  if (!row) throw new Error("Product not found.");
 
   const ownerEmail = normalizeEmail(row.seller_email ?? row.product_email);
   const isOwner = ownerEmail.length > 0 && ownerEmail === userEmail;
   const isAdmin = isAdminEmail(userEmail);
 
   if (!isOwner && !isAdmin) {
-    throw new Error('Not authorized to delete this product.');
+    throw new Error("Not authorized to delete this product.");
   }
 
   // Delete
@@ -268,6 +272,7 @@ export async function deleteProductAsOwner(productId: string) {
   // Refresh seller product list
   if (row.seller_id) {
     revalidatePath(`/dashboard/sellers/profile/${row.seller_id}/products`);
+    redirect(`/dashboard/sellers/profile/${row.seller_id}/products`);
   }
 
   return { sellerId: row.seller_id };
