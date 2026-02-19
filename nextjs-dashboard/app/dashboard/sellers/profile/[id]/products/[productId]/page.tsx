@@ -19,28 +19,23 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type PageProps = {
-  params: Promise<{ productId: string }>;
-  searchParams: Promise<{ from?: string; category?: string }>;
+  params: Promise<{
+    id: string;          // ✅ sellerId from route
+    productId: string;
+  }>;
 };
 
-export default async function ProductDetailPage({
+export default async function SellerProductDetailPage({
   params,
-  searchParams,
 }: PageProps) {
-  const { productId } = await params;
+  const { id: sellerId, productId } = await params;
+
   if (!productId) notFound();
 
   const product = await fetchProductById(productId);
   if (!product) notFound();
 
-  const sp = (await searchParams) ?? {};
-  const category = sp.category?.trim();
-  const from = sp.from?.trim();
-
-  const backHref =
-    category && from === "category"
-      ? `/catalog/categories/${encodeURIComponent(category)}`
-      : "/catalog";
+  const backHref = `/dashboard/sellers/profile/${sellerId}/products`;
 
   const [reviews, avg] = await Promise.all([
     fetchProductReviewsByProductId(product.id),
@@ -49,27 +44,34 @@ export default async function ProductDetailPage({
 
   return (
     <main className="mx-auto max-w-6xl p-6">
+
       {/* Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
-            <Link href="/catalog" className="hover:underline">
-              Catalog
+            <Link href="/dashboard" className="hover:underline">
+              Dashboard
             </Link>
           </li>
 
-          {category && (
-            <>
-              <li className="text-gray-400">/</li>
-              <li>
-                <Link href={backHref} className="hover:underline">
-                  {category}
-                </Link>
-              </li>
-            </>
-          )}
+          <li className="text-gray-400">/</li>
+
+          <li>
+            <Link href="/dashboard/sellers" className="hover:underline">
+              Sellers
+            </Link>
+          </li>
 
           <li className="text-gray-400">/</li>
+
+          <li>
+            <Link href={backHref} className="hover:underline">
+              Products
+            </Link>
+          </li>
+
+          <li className="text-gray-400">/</li>
+
           <li className="font-semibold text-gray-900 line-clamp-1">
             {product.product_name}
           </li>
@@ -80,12 +82,12 @@ export default async function ProductDetailPage({
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Product Details</h1>
 
-        {/* <Link
+        <Link
           href={backHref}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-green-600 hover:cursor-pointer"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-green-600"
         >
-          ← Back to Catalog
-        </Link> */}
+          ← Back to Seller Products
+        </Link>
       </div>
 
       {/* Product section */}
@@ -179,7 +181,6 @@ export default async function ProductDetailPage({
           </div>
         )}
 
-        {/* ✅ Public review form (no auth gate) */}
         <div className="mt-6">
           <ProductReviewForm productId={product.id} />
         </div>
