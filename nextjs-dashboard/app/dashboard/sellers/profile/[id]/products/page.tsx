@@ -126,14 +126,14 @@ export default async function SellerProductsPage({ params, searchParams }: PageP
 
       {/* Search */}
       <div className="mt-4 max-w-md">
-        <Search placeholder="Search this seller‚Äôs products..." />
+        <Search placeholder="Search this sellers products..." />
       </div>
 
       {/* Products grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {products.length === 0 ? (
           <p className="text-sm text-gray-600">
-            No products found{q ? ` for ‚Äú${sp.query}‚Äù.` : '.'}
+            No products found{q ? ` for {sp.query}` : '.'}
           </p>
         ) : (
           products.map((p) => (

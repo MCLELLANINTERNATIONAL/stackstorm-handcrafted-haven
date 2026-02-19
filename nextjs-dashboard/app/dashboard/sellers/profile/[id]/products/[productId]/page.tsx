@@ -179,7 +179,7 @@ export default async function ProductDetailPage({
           </div>
         )}
 
-        {/* ✅ Public review form (no auth gate) */}
+        {/* Public review form (no auth gate) */}
         <div className="mt-6">
           <ProductReviewForm productId={product.id} />
         </div>
