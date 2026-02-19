@@ -42,7 +42,7 @@ export default function CategoryCard() {
       name: "All Products",
       imagePath: "/products/all/hero-desktop.png",
       description: "Beautiful handcrafted products.",
-    }, 
+    },
   ] as const;
 
   return (
@@ -54,7 +54,7 @@ export default function CategoryCard() {
           className="hover:cursor-pointer"
         >
           <div className="mt-5 h-72 w-60 overflow-auto rounded-lg bg-gray-100 p-2 shadow-md shadow-gray-400 transition-all hover:scale-95">
-            <div className="relative h-44 w-full overflow-hidden rounded-lg">
+            <div className="h-44 w-full overflow-hidden rounded-lg">
               <Image
                 src={category.imagePath}
                 className="h-full w-full object-cover"
@@ -78,4 +78,3 @@ export default function CategoryCard() {
     </>
   );
 }
-

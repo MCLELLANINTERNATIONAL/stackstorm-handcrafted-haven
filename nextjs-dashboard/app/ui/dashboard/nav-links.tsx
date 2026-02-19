@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   UserGroupIcon,
@@ -6,22 +6,27 @@ import {
   UserCircleIcon,
   DocumentDuplicateIcon,
   KeyIcon,
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import clsx from 'clsx';
+  ShoppingCartIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import clsx from "clsx";
 
 // Map of links to display in the side navigation.
 const links = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon },
- 
-  { name: 'Catalog', href: '/dashboard/catalog', icon: UserGroupIcon },
-  
-  { name: 'Sellers', href: '/dashboard/sellers', icon: UserCircleIcon },
-  
-  { name: 'Invoices', href: '/dashboard/invoices', icon: DocumentDuplicateIcon,},
-  
-  { name: 'Security', href: '/dashboard/account/security', icon: KeyIcon },
+  { name: "Home", href: "/dashboard", icon: HomeIcon },
+
+  { name: "Shopping", href: "/dashboard/shopping", icon: ShoppingCartIcon },
+
+  { name: "Sellers", href: "/dashboard/sellers", icon: UserCircleIcon },
+
+  {
+    name: "Invoices",
+    href: "/dashboard/invoices",
+    icon: DocumentDuplicateIcon,
+  },
+
+  { name: "Security", href: "/dashboard/account/security", icon: KeyIcon },
 ];
 
 export default function NavLinks() {
@@ -31,7 +36,7 @@ export default function NavLinks() {
     <>
       {links.map((link) => {
         const LinkIcon = link.icon;
-        
+
         const isActive =
           pathname === link.href || pathname.startsWith(`${link.href}/`);
 
@@ -40,9 +45,9 @@ export default function NavLinks() {
             key={link.name}
             href={link.href}
             className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
               {
-                'bg-sky-100 text-blue-600': pathname === link.href,
+                "bg-sky-100 text-blue-600": pathname === link.href,
               },
             )}
           >
