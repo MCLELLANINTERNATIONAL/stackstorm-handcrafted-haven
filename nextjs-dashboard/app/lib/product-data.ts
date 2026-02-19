@@ -179,15 +179,13 @@ export async function fetchProductById(id: string) {
 /* =====================================================
    FETCH PRODUCTS BY CATEGORY (CATALOG CATEGORY PAGE)
 ===================================================== */
-export async function fetchProductsByCategory(
-  category: CategorySlug | 'all-products',
-) {
+export async function fetchProductsByCategory(category: CategorySlug | 'all-products') {
   const cat = String(category ?? '').trim().toLowerCase();
 
   if (!cat) return [];
 
   try {
-    // ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
+    // ✅ ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
     if (cat === 'all-products') {
       const products = await sql<ProductsTableType[]>`
         SELECT
@@ -243,7 +241,7 @@ export async function fetchProductsByCategoryPaginated(
   if (!cat) return [];
 
   try {
-    // ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
+    // ✅ ALL PRODUCTS (special-case, no enum cast, no WHERE filter)
     if (cat === 'all-products') {
       const products = await sql<ProductsTableType[]>`
         SELECT
@@ -296,7 +294,7 @@ export async function fetchCategoryPages(category: CategorySlug | 'all-products'
   if (!cat) return 0;
 
   try {
-    // ALL PRODUCTS (count everything)
+    // ✅ ALL PRODUCTS (count everything)
     if (cat === 'all-products') {
       const data = await sql`
         SELECT COUNT(*)::int AS count
@@ -338,6 +336,11 @@ function isCategorySlug(v: string): v is CategorySlug {
   return (CATEGORY_SLUGS as readonly string[]).includes(v);
 }
 
+function parseCategoryFilter(input?: string): CategorySlug | null {
+  const raw = String(input ?? '').trim().toLowerCase();
+  return isCategorySlug(raw) ? raw : null;
+}
+
 export async function fetchProductsForCategoryPage(args: {
   routeCategory: CategorySlug | typeof ALL_PRODUCTS_SLUG;
   currentPage: number;
@@ -355,10 +358,9 @@ export async function fetchProductsForCategoryPage(args: {
   const route = String(args.routeCategory).trim().toLowerCase();
 
   try {
-    // all-products (optional category dropdown)
+    // ✅ all-products (optional category dropdown)
     if (route === ALL_PRODUCTS_SLUG) {
-      const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
-      const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+      const selectedCategory = parseCategoryFilter(args.categoryFilter);
 
       const products = await sql<ProductsTableType[]>`
         SELECT
@@ -376,14 +378,17 @@ export async function fetchProductsForCategoryPage(args: {
             COALESCE(description,'') ILIKE ${`%${q}%`} OR
             price::text ILIKE ${`%${q}%`}
           )
-          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``}
+          AND (
+            ${selectedCategory === null}
+            OR category = ${selectedCategory}::product_category
+          )
         ORDER BY created_at DESC
         LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
       `;
       return products;
     }
 
-    // normal category pages
+    // ✅ normal category pages
     const cat = route as CategorySlug;
 
     const products = await sql<ProductsTableType[]>`
@@ -428,8 +433,7 @@ export async function fetchProductsForCategoryPagesCount(args: {
 
   try {
     if (route === ALL_PRODUCTS_SLUG) {
-      const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
-      const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
+      const selectedCategory = parseCategoryFilter(args.categoryFilter);
 
       const data = await sql`
         SELECT COUNT(*)::int AS count
@@ -445,7 +449,10 @@ export async function fetchProductsForCategoryPagesCount(args: {
             COALESCE(description,'') ILIKE ${`%${q}%`} OR
             price::text ILIKE ${`%${q}%`}
           )
-          ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``};
+          AND (
+            ${selectedCategory === null}
+            OR category = ${selectedCategory}::product_category
+          );
       `;
 
       return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
@@ -516,7 +523,6 @@ export async function fetchProductsBySellerIdAndCategory(
 
 /* =====================================================
   FETCH SELLER PRODUCTS (PUBLIC VIEW) WITH FILTERS
-  ✅ MIN FIX: do NOT cast "all" to product_category enum
 ===================================================== */
 export async function fetchProductsForSellerPage(args: {
   sellerId: string;
@@ -531,10 +537,7 @@ export async function fetchProductsForSellerPage(args: {
   const q = String(args.q ?? '').trim();
   const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
   const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
-
-  const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
-  const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
-
+  const selectedCategory = parseCategoryFilter(args.categoryFilter);
   const sellerId = String(args.sellerId ?? '').trim();
   const sellerEmail = String(args.sellerEmail ?? '').trim().toLowerCase();
   const useEmailFallback = sellerEmail.length > 0;
@@ -566,7 +569,10 @@ export async function fetchProductsForSellerPage(args: {
           COALESCE(description,'') ILIKE ${`%${q}%`} OR
           price::text ILIKE ${`%${q}%`}
         )
-        ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``}
+        AND (
+          ${selectedCategory === null}
+          OR category = ${selectedCategory}::product_category
+        )
       ORDER BY created_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
     `;
@@ -589,10 +595,7 @@ export async function fetchProductsForSellerPagesCount(args: {
   const q = String(args.q ?? '').trim();
   const min = Number.isFinite(args.minPrice) ? args.minPrice : 0;
   const max = Number.isFinite(args.maxPrice) ? args.maxPrice : 999999;
-
-  const rawCat = String(args.categoryFilter ?? 'all').trim().toLowerCase();
-  const useCategory = rawCat !== 'all' && isCategorySlug(rawCat);
-
+  const selectedCategory = parseCategoryFilter(args.categoryFilter);
   const sellerId = String(args.sellerId ?? '').trim();
   const sellerEmail = String(args.sellerEmail ?? '').trim().toLowerCase();
   const useEmailFallback = sellerEmail.length > 0;
@@ -622,7 +625,10 @@ export async function fetchProductsForSellerPagesCount(args: {
           COALESCE(description,'') ILIKE ${`%${q}%`} OR
           price::text ILIKE ${`%${q}%`}
         )
-        ${useCategory ? sql`AND category = ${rawCat}::product_category` : sql``};
+        AND (
+          ${selectedCategory === null}
+          OR category = ${selectedCategory}::product_category
+        );
     `;
 
     return Math.ceil(Number(data[0].count ?? 0) / ITEMS_PER_PAGE);
