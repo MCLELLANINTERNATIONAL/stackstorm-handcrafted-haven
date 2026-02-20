@@ -1,4 +1,3 @@
-// app/dashboard/sellers/profile/[id]/delete/page.tsx
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -54,4 +53,3 @@ export default async function DeleteProfilePage({
     </div>
   );
 }
-

@@ -13,7 +13,6 @@ export default function DeleteSellerForm({ sellerId }: { sellerId: string }) {
 
   const action = async (_prevState: DeleteState, _formData: FormData) => {
     try {
-      // Uses ONLY the Postgres-generated sellers.id
       await deleteSeller(sellerId);
       return { message: '' };
     } catch (err: unknown) {
@@ -30,7 +29,6 @@ export default function DeleteSellerForm({ sellerId }: { sellerId: string }) {
         Type <span className="font-semibold">DELETE</span> below to confirm.
       </p>
 
-      {/* Confirmation gate to prevent accidental deletion */}
       <label htmlFor="confirm" className="sr-only">
         Confirmation text
       </label>

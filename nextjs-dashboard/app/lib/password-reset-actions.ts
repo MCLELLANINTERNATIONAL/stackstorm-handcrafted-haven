@@ -88,7 +88,7 @@ export async function requestPasswordReset(
 
     const user = users[0];
 
-    // Always return a generic success to avoid account enumeration.
+    // Return a generic success to avoid account enumeration.
     const genericMessage =
       'If an account exists for that email, a reset link has been generated.';
 

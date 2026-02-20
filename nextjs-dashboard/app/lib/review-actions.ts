@@ -49,8 +49,7 @@ export async function createSellerReview(
   const { sellerId, rating, comment, productName } = validated.data;
 
   try {
-    // NO manual IDs: Postgres generates seller_reviews.id (DEFAULT uuid_generate_v4()).
-    // sellerId must be an existing sellers.id (FK).
+    // sellerId must be an existing sellers.id
     await sql`
       INSERT INTO seller_reviews (seller_id, rating, comment, product_name)
       VALUES (${sellerId}::uuid, ${rating}, ${comment}, ${productName ?? null})

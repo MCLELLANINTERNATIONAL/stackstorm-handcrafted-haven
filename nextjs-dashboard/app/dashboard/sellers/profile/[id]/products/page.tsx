@@ -20,7 +20,6 @@ type PageProps = {
   searchParams?: Promise<{ query?: string; page?: string }>;
 };
 
-// keep your existing page size if you already set one for pagination
 const ITEMS_PER_PAGE = 6;
 
 export default async function SellerProductsPage({ params, searchParams }: PageProps) {

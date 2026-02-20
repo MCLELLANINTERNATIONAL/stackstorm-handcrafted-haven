@@ -132,7 +132,7 @@ export default async function CategoryPage({
         </Link>
       </div>
 
-      {/* ✅ Filters */}
+      {/* Filters */}
       <div className="mt-4">
         <ProductFilters
           showCategoryFilter={isAll}

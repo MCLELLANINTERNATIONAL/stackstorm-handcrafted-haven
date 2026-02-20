@@ -24,7 +24,6 @@ export default function EditSellerProfileForm({ seller }: { seller: SellerForm }
   const initialState: State = { message: '', errors: {} };
 
   const action = async (prevState: State, formData: FormData) => {
-    // Uses ONLY Postgres-generated UUID
     return updateSeller(seller.id!, prevState, formData);
   };
 
@@ -172,7 +171,6 @@ export default function EditSellerProfileForm({ seller }: { seller: SellerForm }
           </div>
         </div>
 
-        {/* Optional Password Reset */}
         <div className="mb-4">
           <label htmlFor="password" className="mb-2 block text-sm font-medium">
             New login password (optional)

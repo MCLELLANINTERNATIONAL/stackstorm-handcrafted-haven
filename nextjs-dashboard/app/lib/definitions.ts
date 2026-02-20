@@ -1,6 +1,6 @@
 // Type definitions for your data.
 // Describes the shape of the data, and what data type each property should accept.
-// However, these types are generated automatically
+// Types are generated automatically
 // =======================
 // Users
 // =======================
@@ -77,7 +77,7 @@ export type SellerForm = {
   image_url: string | null;
 };
 
-// Used for createSeller action
+// createSeller action
 export type CreateSellerInput = {
   seller_name: string;
   category: string;
@@ -123,7 +123,7 @@ export type ProductsTableType = {
   created_at: string;
 };
 
-// Used for edit forms / fetchProductById
+// edit forms / fetchProductById
 export type ProductForm = {
   id: string;
   seller_id: string | null;
@@ -137,7 +137,7 @@ export type ProductForm = {
   created_at: Date | string;
 };
 
-// Used for createProduct action
+// createProduct action
 export type CreateProductInput = {
   product_name: string;
   category: string;
