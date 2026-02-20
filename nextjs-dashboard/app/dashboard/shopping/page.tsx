@@ -23,7 +23,7 @@ type PageProps = {
   }>;
 };
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Products • All Products",
   };
@@ -38,9 +38,7 @@ export default async function CategoryPage({ searchParams }: PageProps) {
   const routeCategory = isAll ? "all-products" : (category as CategorySlug);
 
   const q = String(sp.q ?? "").trim();
-  const categoryFilter = String(sp.category ?? "all")
-    .trim()
-    .toLowerCase();
+  const categoryFilter = String(sp.category ?? "all").trim().toLowerCase();
 
   const parsedMin = Number(sp.minPrice ?? "0");
   const parsedMax = Number(sp.maxPrice ?? "500");
@@ -67,39 +65,6 @@ export default async function CategoryPage({ searchParams }: PageProps) {
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
-      {/* 🧭 Breadcrumbs
-      <nav className="mb-4 text-sm text-gray-600">
-        <ol className="flex flex-wrap items-center gap-2">
-          <li>
-            <Link href="/app" className="hover:underline">
-              Categories
-            </Link>
-          </li>
-
-          <li className="text-gray-400">/</li>
-
-          <li>
-            <Link href="/catalog" className="hover:underline">
-              Catalog
-            </Link>
-          </li>
-
-          <li className="text-gray-400">/</li>
-
-          <li>
-            <Link href="/catalog/categories" className="hover:underline">
-              Categories
-            </Link>
-          </li>
-
-          <li className="text-gray-400">/</li>
-
-          <li className="font-semibold text-gray-900 capitalize">
-            {isAll ? "All Products" : category}
-          </li>
-        </ol>
-      </nav> */}
-
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
@@ -130,7 +95,7 @@ export default async function CategoryPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {/* ✅ Filters */}
+      {/* Filters */}
       <div className="mt-4">
         <ProductFilters
           showCategoryFilter={true}
@@ -158,6 +123,8 @@ export default async function CategoryPage({ searchParams }: PageProps) {
             <ProductCard
               key={product.id}
               product={product}
+              // tells ProductCard to build ?from=shopping links
+              shoppingFrom
               categoryFrom={
                 isAll ? ("all-products" as any) : (category as CategorySlug)
               }
