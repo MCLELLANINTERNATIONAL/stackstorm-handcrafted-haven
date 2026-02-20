@@ -23,7 +23,8 @@ type PageProps = {
   }>;
 };
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
+  
   return {
     title: "Products • All Products",
   };
