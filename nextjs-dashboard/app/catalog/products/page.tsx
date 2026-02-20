@@ -71,7 +71,7 @@ export default async function CategoryPage({
 
   return (
     <div className="w-full rounded bg-gray-100 p-4">
-      {/* 🧭 Breadcrumbs */}
+      {/* Breadcrumbs */}
       <nav className="mb-4 text-sm text-gray-600">
         <ol className="flex flex-wrap items-center gap-2">
           <li>

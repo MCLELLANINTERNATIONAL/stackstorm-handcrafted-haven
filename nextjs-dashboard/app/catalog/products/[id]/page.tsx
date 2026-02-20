@@ -87,7 +87,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           href={backHref}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-green-600 hover:cursor-pointer"
         >
-          ← Back to Catalog
+          ← Back to Category
         </Link>
       </div>
 

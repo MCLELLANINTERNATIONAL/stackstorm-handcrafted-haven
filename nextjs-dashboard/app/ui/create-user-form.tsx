@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { createUser } from "@/app/lib/users_actions/users";
 
 export default function CreateUser() {
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [message, setMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -18,10 +18,8 @@ export default function CreateUser() {
     setMessage("");
 
     const formData = new FormData(form);
-
     const result = await createUser(formData);
 
-    // check for errors
     if (!result?.success) {
       if (result?.errors) {
         setErrors(result.errors);
@@ -29,7 +27,13 @@ export default function CreateUser() {
         setMessage(result?.message || "Something went wrong");
       }
       setLoading(false);
+      return;
     }
+
+    // success
+    setLoading(false);
+    setMessage(result?.message || "User created!");
+    form.reset();
   }
 
   return (
@@ -39,10 +43,15 @@ export default function CreateUser() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
         <div>
-          <label>Name</label>
+          <label htmlFor="name" className="block mb-1">
+            Name
+          </label>
           <input
+            id="name"
             name="name"
             type="text"
+            autoComplete="name"
+            required
             className="w-full border p-2 rounded"
           />
           {errors.name && (
@@ -52,10 +61,15 @@ export default function CreateUser() {
 
         {/* Email */}
         <div>
-          <label>Email</label>
+          <label htmlFor="email" className="block mb-1">
+            Email
+          </label>
           <input
+            id="email"
             name="email"
             type="email"
+            autoComplete="email"
+            required
             className="w-full border p-2 rounded"
           />
           {errors.email && (
@@ -65,10 +79,15 @@ export default function CreateUser() {
 
         {/* Password */}
         <div>
-          <label>Password</label>
+          <label htmlFor="password" className="block mb-1">
+            Password
+          </label>
           <input
+            id="password"
             name="password"
             type="password"
+            autoComplete="new-password"
+            required
             className="w-full border p-2 rounded"
           />
           {errors.password && (
@@ -79,7 +98,7 @@ export default function CreateUser() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded"
+          className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-60"
         >
           {loading ? "Creating..." : "Create User"}
         </button>
@@ -89,3 +108,4 @@ export default function CreateUser() {
     </div>
   );
 }
+
