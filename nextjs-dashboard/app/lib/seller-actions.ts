@@ -36,7 +36,7 @@ const FormSchema = z.object({
       (v) => !v || v.startsWith('/') || v.startsWith('http://') || v.startsWith('https://'),
       { message: 'Image URL must start with / or http(s)://' },
     )
-    .transform((v) => (v && v.length > 0 ? v : null)), // ✅ always string | null
+    .transform((v) => (v && v.length > 0 ? v : null)),
 });
 
 type FormFields = z.infer<typeof FormSchema>;
@@ -116,7 +116,7 @@ export async function createSeller(
     email: formData.get('email')?.toString(),
     contact: formData.get('contact')?.toString(),
     story: formData.get('story')?.toString(),
-    imageUrl: formData.get('imageUrl')?.toString(), // ✅ transform handles empty -> null
+    imageUrl: formData.get('imageUrl')?.toString(), // transform handles empty -> null
   });
 
   if (!validatedFields.success) {

@@ -20,7 +20,7 @@ export const revalidate = 0;
 
 type PageProps = {
   params: Promise<{
-    id: string; // ✅ sellerId from route
+    id: string; 
     productId: string;
   }>;
 };

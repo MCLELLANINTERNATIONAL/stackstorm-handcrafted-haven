@@ -131,7 +131,7 @@ export default async function CategoryPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {/* ✅ Filters */}
+      {/* Filters */}
       <div className="mt-4">
         <ProductFilters
           showCategoryFilter={true}

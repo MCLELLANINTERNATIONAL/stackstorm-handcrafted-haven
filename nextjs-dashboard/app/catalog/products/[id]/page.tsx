@@ -33,7 +33,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   const product = await fetchProductById(id);
   if (!product) notFound();
 
-  // ✅ NEW: resolve seller via product
   const seller = await fetchSellerByProductId(product.id);
 
   const sp = (await searchParams) ?? {};
@@ -105,7 +104,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             />
           </div>
 
-          {/* ✅ NEW BUTTON */}
+          {/* BUTTON */}
           {seller ? (
             <Link
               href={`/catalog/sellers/${seller.id}`}

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'Create Seller Profile',
 };
 
-// Ensures this page is rendered dynamically (good while developing DB features)
+// Ensures this page is rendered dynamically
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
