@@ -14,16 +14,20 @@ export default function ProductCard({
   product,
   categoryFrom,
   sourceSellerId,
+  sellerFromId, // ✅ add this (so public seller page works)
 }: ProductCardProps) {
-  const href = sourceSellerId
+  // ✅ allow either prop name (dashboard can keep using sourceSellerId)
+  const sellerId = sourceSellerId ?? sellerFromId;
+
+  const href = sellerId
     ? `/catalog/products/${product.id}?from=seller&sellerId=${encodeURIComponent(
-        sourceSellerId,
+        sellerId
       )}`
     : categoryFrom
       ? `/catalog/products/${product.id}?from=category&category=${encodeURIComponent(
-          categoryFrom,
+          categoryFrom
         )}`
-      : `products/${product.id}`;
+      : `products/${product.id}`; // ✅ KEEP relative fallback for dashboard
 
   return (
     <Link href={href} className="block group">
