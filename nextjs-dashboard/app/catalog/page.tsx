@@ -1,7 +1,5 @@
 import Link from 'next/link';
 import { lusitana } from '@/app/ui/fonts';
-import { Suspense } from 'react';
-import Search from '@/app/ui/search';
 import CategoryCard from '@/app/ui/catalog/category-card';
 import type { Metadata } from 'next';
 
@@ -26,12 +24,6 @@ export default function Page() {
         >
           ← Back to Home
         </Link>
-      </div>
-
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Suspense fallback={<div className="h-10 w-full rounded-md bg-white/60" />}>
-          <Search placeholder="Search products..." />
-        </Suspense>
       </div>
 
       <div className="mx-auto mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
